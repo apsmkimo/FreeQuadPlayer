@@ -14,9 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
+// SMCPKG_SUPPORT>>>Cursor003
+// import androidx.compose.material.icons.filled.VolumeOff
+// import androidx.compose.material.icons.filled.VolumeUp
+// SMCPKG_SUPPORT<<<Cursor003
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -155,7 +159,14 @@ private fun CellOverlay(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = if (isUnmuted) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
+                    // SMCPKG_SUPPORT>>>Cursor003
+                    // imageVector = if (isUnmuted) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
+                    imageVector = if (isUnmuted) {
+                        Icons.AutoMirrored.Filled.VolumeUp
+                    } else {
+                        Icons.AutoMirrored.Filled.VolumeOff
+                    },
+                    // SMCPKG_SUPPORT<<<Cursor003
                     contentDescription = stringResource(
                         if (isUnmuted) R.string.unmuted_label else R.string.muted_label,
                     ),

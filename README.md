@@ -20,14 +20,14 @@
 
 - Android Studio Hedgehog 或更新版本（建議使用最新穩定版）
 - JDK 17
-- Android SDK Platform 35
+- Android SDK Platform 36（Media3 1.11.0 需要 compileSdk 36；targetSdk 仍為 35）
 - 實體裝置或模擬器，minSdk 24
 
 ## 用 Android Studio 開啟與執行
 
 ### 中文
 
-1. 安裝 [Android Studio](https://developer.android.com/studio) 並透過 SDK Manager 安裝 **Android SDK 35**、**Build-Tools**。
+1. 安裝 [Android Studio](https://developer.android.com/studio) 並透過 SDK Manager 安裝 **Android SDK 36**、**Build-Tools**。
 2. **File → Open**，選取本倉庫根目錄（含 `settings.gradle.kts` 的資料夾）。
 3. 等待 Gradle Sync 完成。
 4. 連接 Android 裝置（或啟動模擬器），裝置上請準備至少一支本機影片。
@@ -37,7 +37,7 @@
 
 ### English
 
-1. Install [Android Studio](https://developer.android.com/studio) and the **Android 35** SDK platform.
+1. Install [Android Studio](https://developer.android.com/studio) and the **Android 36** SDK platform (Media3 1.11.0 requires compileSdk 36; targetSdk stays 35).
 2. **File → Open** the repository root (the folder that contains `settings.gradle.kts`).
 3. Wait for Gradle Sync to finish.
 4. Connect a device or start an emulator that already has local video files.
@@ -79,8 +79,9 @@ QuadVideoPlayer/
 | Item | Version |
 | --- | --- |
 | minSdk | 24 |
-| compileSdk / targetSdk | 35 |
+| compileSdk | 36 (required by Media3 1.11.0) |
+| targetSdk | 35 |
 | AGP | 8.7.3 |
-| Kotlin | 2.0.21 |
+| Kotlin | 2.2.10 |
 | Compose BOM | 2024.12.01 |
 | Media3 | 1.11.0 |

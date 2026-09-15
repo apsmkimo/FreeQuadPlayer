@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "com.example.quadvideoplayer"
-    compileSdk = 35
+    // SMCPKG_SUPPORT>>>Cursor001
+    // compileSdk = 35
+    compileSdk = 36
+    // SMCPKG_SUPPORT<<<Cursor001
 
     defaultConfig {
         applicationId = "com.example.quadvideoplayer"
@@ -31,9 +34,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    // SMCPKG_SUPPORT>>>Cursor003
+    // kotlinOptions {
+    //     jvmTarget = "17"
+    // }
+    // SMCPKG_SUPPORT<<<Cursor003
 
     buildFeatures {
         compose = true
@@ -43,6 +48,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 

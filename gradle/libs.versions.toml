@@ -1,6 +1,9 @@
 [versions]
 agp = "8.7.3"
-kotlin = "2.0.21"
+# SMCPKG_SUPPORT>>>Cursor002
+# kotlin = "2.0.21"
+kotlin = "2.2.10"
+# SMCPKG_SUPPORT<<<Cursor002
 coreKtx = "1.15.0"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
