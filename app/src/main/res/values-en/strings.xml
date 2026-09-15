@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuadVideoPlayer</string>
+    <string name="master_play">Play all</string>
+    <string name="master_pause">Pause all</string>
+    <string name="pick_video">Pick video</string>
+    <string name="change_video">Change</string>
+    <string name="placeholder_title">No video selected</string>
+    <string name="placeholder_hint">Tap to pick a local video</string>
+    <string name="unmuted_label">Audio on</string>
+    <string name="muted_label">Muted</string>
+    <string name="permission_needed_title">Local video access needed</string>
+    <string name="permission_needed_body">Grant access to browse videos on this device. You can also pick a file with the system picker without full gallery access.</string>
+    <string name="permission_grant">Grant permission</string>
+    <string name="permission_settings">Open settings</string>
+    <string name="permission_granted">Video read permission granted</string>
+    <string name="cell_index">Pane %1$d</string>
+</resources>
