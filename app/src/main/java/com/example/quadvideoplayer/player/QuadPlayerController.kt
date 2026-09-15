@@ -3,22 +3,28 @@ package com.example.quadvideoplayer.player
 import android.content.Context
 import android.net.Uri
 import androidx.annotation.OptIn
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 
 /**
- * Holds four independent ExoPlayers plus the shared mute / play-pause policy.
+ * Holds four independent ExoPlayers. Each can play audio at the same time.
  */
 class QuadPlayerController(
     context: Context,
     val playerCount: Int = PLAYER_COUNT,
 ) {
-    val players: List<ExoPlayer> = List(playerCount) { index ->
+    val players: List<ExoPlayer> = List(playerCount) {
         ExoPlayer.Builder(context.applicationContext).build().apply {
             repeatMode = Player.REPEAT_MODE_ONE
-            volume = if (index == DEFAULT_UNMUTED_INDEX) 1f else 0f
+            // SMCPKG_SUPPORT>>>Cursor004
+            // volume = if (index == DEFAULT_UNMUTED_INDEX) 1f else 0f
+            volume = 1f
+            setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
+            // SMCPKG_SUPPORT<<<Cursor004
             playWhenReady = false
         }
     }
@@ -26,23 +32,39 @@ class QuadPlayerController(
     @Volatile
     private var released: Boolean = false
 
-    fun setUnmuted(index: Int) {
-        if (released) return
-        players.forEachIndexed { i, player ->
-            player.volume = if (i == index) 1f else 0f
-        }
-    }
-
-    fun setPlaying(playing: Boolean) {
-        if (released) return
-        players.forEach { player ->
-            player.playWhenReady = playing
-        }
-    }
+    // SMCPKG_SUPPORT>>>Cursor004
+    // fun setUnmuted(index: Int) {
+    //     if (released) return
+    //     players.forEachIndexed { i, player ->
+    //         player.volume = if (i == index) 1f else 0f
+    //     }
+    // }
+    //
+    // fun setPlaying(playing: Boolean) {
+    //     if (released) return
+    //     players.forEach { player ->
+    //         player.playWhenReady = playing
+    //     }
+    // }
+    // SMCPKG_SUPPORT<<<Cursor004
 
     fun pauseAll() {
         if (released) return
         players.forEach { it.pause() }
+    }
+
+    fun resumePlaying(playingFlags: List<Boolean>) {
+        if (released) return
+        players.forEachIndexed { index, player ->
+            if (playingFlags.getOrElse(index) { false }) {
+                player.play()
+            }
+        }
+    }
+
+    fun snapshotPlaying(): List<Boolean> {
+        if (released) return List(playerCount) { false }
+        return players.map { it.playWhenReady || it.isPlaying }
     }
 
     @OptIn(UnstableApi::class)
@@ -57,6 +79,8 @@ class QuadPlayerController(
         player.setMediaItem(MediaItem.fromUri(uri))
         player.prepare()
         player.playWhenReady = playWhenReady
+        player.volume = 1f
+        player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
     }
 
     fun releaseAll() {
@@ -72,7 +96,19 @@ class QuadPlayerController(
 
     companion object {
         const val PLAYER_COUNT = 4
-        const val DEFAULT_UNMUTED_INDEX = 0
+        // SMCPKG_SUPPORT>>>Cursor004
+        // const val DEFAULT_UNMUTED_INDEX = 0
+        // SMCPKG_SUPPORT<<<Cursor004
         const val GRID_COLUMNS = 2
+
+        fun concurrentMediaAttributes(): AudioAttributes {
+            return AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                // SMCPKG_SUPPORT>>>Cursor004
+                // .setContentType(C.CONTENT_TYPE_MOVIE)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                // SMCPKG_SUPPORT<<<Cursor004
+                .build()
+        }
     }
 }

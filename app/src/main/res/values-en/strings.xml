@@ -15,4 +15,6 @@
     <string name="permission_settings">Open settings</string>
     <string name="permission_granted">Video read permission granted</string>
     <string name="cell_index">Pane %1$d</string>
+    <string name="cell_play">Play</string>
+    <string name="cell_pause">Pause</string>
 </resources>

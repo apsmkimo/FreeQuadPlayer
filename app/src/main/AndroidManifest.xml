@@ -20,6 +20,8 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
+            android:resizeableActivity="true"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.QuadVideoPlayer"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

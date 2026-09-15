@@ -15,4 +15,6 @@
     <string name="permission_settings">開啟設定</string>
     <string name="permission_granted">已授予影片讀取權限</string>
     <string name="cell_index">畫面 %1$d</string>
+    <string name="cell_play">播放</string>
+    <string name="cell_pause">暫停</string>
 </resources>
