@@ -6,9 +6,9 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 ## Key Features
 
-- **Layout picker every launch** — Four name-only buttons: **2x2 Grid**, **1x stack (1x4)**, **1x2 Vertical**, **2x1 Horizontal**. The choice is in-session only (not stored). Cold start always shows the picker. Tap the layout button in the player (top-right) to switch without disposing players.
+- **Layout picker every launch** — A 2×2 glass tile grid: **2x2 Grid**, **1x4 Stack**, **1x2 Vertical**, **2x1 Horizontal**. The choice is in-session only (not stored). Cold start always shows the picker. Tap the layout button in the player (top-right) to switch without disposing players.
 - **2x2 Grid** — Four independent local videos in a landscape 2×2 grid.
-- **1x stack (1x4)** — Four players stacked top-to-bottom in portrait, hairline separators, FIT letterbox.
+- **1x4 Stack** — Four players stacked top-to-bottom in portrait, hairline separators, FIT letterbox.
 - **1x2 Vertical** — Two players stacked top-to-bottom in portrait.
 - **2x1 Horizontal** — Two players side-by-side in landscape.
 - **Intelligent Aspect-Ratio Matching** — Each cell uses FIT scaling so videos keep their native aspect ratio, with letterboxing or pillarboxing (black bars) when dimensions do not match the cell.
@@ -30,7 +30,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 **Package ID:** `com.example.quadvideoplayer`  
 **SDK:** minSdk 24 · compileSdk 36 · targetSdk 35  
-**Version:** 1.0.9 (`versionCode` 109)
+**Version:** 1.0.10 (`versionCode` 110)
 
 Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven Central. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module with a prebuilt `libffmpegJNI.so` (FFmpeg 6.0). Modern H.264/HEVC streams stay on hardware MediaCodec; FFmpeg is preferred for allowlisted legacy codecs. See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md) for native rebuild notes.
 
@@ -53,7 +53,7 @@ GitHub Actions builds a debug APK on every push to `main` and uploads it as an a
 8. Copy the APK to an Android device or emulator (minSdk 24).
 9. Allow installation from that source if prompted, then open the APK to install TetraView.
 10. Grant video-read permission when asked (`READ_MEDIA_VIDEO` on Android 13+, otherwise `READ_EXTERNAL_STORAGE`).
-11. Every launch, tap one of **2x2 Grid**, **1x stack (1x4)**, **1x2 Vertical**, or **2x1 Horizontal**. Tap an empty cell, pick a folder, then a video. Tap a playing cell to show overlay controls. Use the top-right layout button to switch modes later.
+11. Every launch, tap one of **2x2 Grid**, **1x4 Stack**, **1x2 Vertical**, or **2x1 Horizontal**. Tap an empty cell, pick a folder, then a video. Tap a playing cell to show overlay controls. Use the top-right layout button to switch modes later.
 
 ### Build from source (optional)
 
@@ -73,4 +73,4 @@ Local `./gradlew assembleDebug` and GitHub Actions CI use the same committed deb
 - Alias: `androiddebugkey`
 - Store / key password: `android`
 
-`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.9 → 109).
+`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.10 → 110).

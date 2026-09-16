@@ -16,11 +16,12 @@ plugins {
 // val APP_VERSION_NAME = "1.0.6"
 // val APP_VERSION_NAME = "1.0.7"
 // val APP_VERSION_NAME = "1.0.8"
-val APP_VERSION_NAME = "1.0.9"
+// val APP_VERSION_NAME = "1.0.9"
+val APP_VERSION_NAME = "1.0.10"
 // SMCPKG_SUPPORT<<<Cursor011
 
 /**
- * Maps versionName to versionCode: 1.0.0 → 100 … 1.0.9 → 109.
+ * Maps versionName to versionCode: 1.0.0 → 100 … 1.0.10 → 110.
  * Increment versionCode by 1 whenever versionName increases by 0.01.
  */
 fun versionCodeFor(versionName: String): Int {

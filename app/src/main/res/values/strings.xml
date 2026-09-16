@@ -37,7 +37,8 @@
     <!-- SMCPKG_SUPPORT<<<Cursor012 -->
     <!-- SMCPKG_SUPPORT>>>Cursor019 -->
     <string name="layout_2x2_grid">2x2 Grid</string>
-    <string name="layout_1x4_stack">1x stack (1x4)</string>
+    <!-- <string name="layout_1x4_stack">1x stack (1x4)</string> -->
+    <string name="layout_1x4_stack">1x4 Stack</string>
     <string name="layout_1x2_vertical">1x2 Vertical</string>
     <string name="layout_2x1_horizontal">2x1 Horizontal</string>
     <!-- SMCPKG_SUPPORT<<<Cursor019 -->
