@@ -73,6 +73,14 @@ fun VideoCell(
     onAttachPlayerView: (PlayerView) -> Unit = {},
     onDetachPlayerView: (PlayerView) -> Unit = {},
     // SMCPKG_SUPPORT<<<Cursor015
+    // SMCPKG_SUPPORT>>>Cursor017
+    onTogglePlay: () -> Unit = {
+        if (player.isPlaying) player.pause() else {
+            player.playWhenReady = true
+            player.play()
+        }
+    },
+    // SMCPKG_SUPPORT<<<Cursor017
 ) {
     // SMCPKG_SUPPORT>>>Cursor004
     // val shape = RoundedCornerShape(12.dp)
@@ -109,14 +117,15 @@ fun VideoCell(
         if (videoUri == null) {
             EmptyVideoPlaceholder(index = index)
         // SMCPKG_SUPPORT>>>Cursor013
+        // SMCPKG_SUPPORT>>>Cursor017
+        // } else if (!attachSurface) {
+        //     // Keep a black placeholder while the picker is open so SurfaceView
+        //     // does not punch through the overlay or sit in a zero-size lazy slot.
+        //     Box(Modifier.fillMaxSize().background(Color.Black))
+        // TextureView: stay mounted so the live ExoPlayer keeps (or re-gains) a surface.
         } else if (!attachSurface) {
-            // Keep a black placeholder while the picker is open so SurfaceView
-            // does not punch through the overlay or sit in a zero-size lazy slot.
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(androidx.compose.ui.graphics.Color.Black),
-            )
+            EmptyVideoPlaceholder(index = index)
+        // SMCPKG_SUPPORT<<<Cursor017
         // SMCPKG_SUPPORT<<<Cursor013
         } else {
             AndroidView(
@@ -188,6 +197,9 @@ fun VideoCell(
                 CellPlaybackBar(
                     player = player,
                     onPickVideo = onPickVideo,
+                    // SMCPKG_SUPPORT>>>Cursor017
+                    onTogglePlay = onTogglePlay,
+                    // SMCPKG_SUPPORT<<<Cursor017
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }

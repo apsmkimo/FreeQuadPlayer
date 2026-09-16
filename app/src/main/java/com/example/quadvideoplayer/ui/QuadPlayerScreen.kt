@@ -160,6 +160,11 @@ fun QuadPlayerScreen(
         key(index) {
             LaunchedEffect(uriString) {
                 if (uriString.isEmpty()) return@LaunchedEffect
+                // SMCPKG_SUPPORT>>>Cursor017
+                // First pick composes AndroidView in this same snapshot; wait one
+                // frame so attachPlayerView can bind the TextureView before prepare.
+                delay(16)
+                // SMCPKG_SUPPORT<<<Cursor017
                 controller.setVideo(
                     index = index,
                     uri = Uri.parse(uriString),
@@ -286,7 +291,13 @@ fun QuadPlayerScreen(
                 player = player,
                 videoUri = uri,
                 onPickVideo = { pickVideo(index) },
-                attachSurface = !(showPicker && index == pickingIndex),
+                // SMCPKG_SUPPORT>>>Cursor017
+                // attachSurface = !(showPicker && index == pickingIndex),
+                // TextureView does not punch through the picker. Keep the cell's
+                // PlayerView mounted so setVideo can attach → prepare → play.
+                attachSurface = true,
+                onTogglePlay = { controller.togglePlay(index) },
+                // SMCPKG_SUPPORT<<<Cursor017
                 onAttachPlayerView = { view -> controller.attachPlayerView(index, view) },
                 onDetachPlayerView = { view -> controller.detachPlayerView(index, view) },
                 modifier = Modifier.fillMaxSize(),

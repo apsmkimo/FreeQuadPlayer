@@ -41,9 +41,11 @@ import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.avi.AviExtractor
 import androidx.media3.extractor.text.DefaultSubtitleParserFactory
 import androidx.media3.ui.PlayerView
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
 /**
@@ -80,6 +82,9 @@ class QuadPlayerController(
                 // SMCPKG_SUPPORT>>>Cursor014
                 addListener(PlayerErrorLogger(index))
                 // SMCPKG_SUPPORT<<<Cursor014
+                // SMCPKG_SUPPORT>>>Cursor017
+                addListener(AutoPlayOnReadyListener(index))
+                // SMCPKG_SUPPORT<<<Cursor017
             }
         // SMCPKG_SUPPORT<<<Cursor007
     }
@@ -97,6 +102,10 @@ class QuadPlayerController(
     private val swapMutexes = Array(playerCount) { Mutex() }
     private val boundViews = arrayOfNulls<PlayerView>(playerCount)
     // SMCPKG_SUPPORT<<<Cursor016
+    // SMCPKG_SUPPORT>>>Cursor017
+    // True after a pick (or Play) until the user pauses that cell.
+    private val autoplayWanted = BooleanArray(playerCount)
+    // SMCPKG_SUPPORT<<<Cursor017
 
     // SMCPKG_SUPPORT>>>Cursor004
     // fun setUnmuted(index: Int) {
@@ -150,9 +159,43 @@ class QuadPlayerController(
         // SMCPKG_SUPPORT>>>Cursor016
         // if (swapping) return
         // SMCPKG_SUPPORT<<<Cursor016
-        runCatching { view.player = players[index] }
+        val player = players[index]
+        runCatching { view.player = player }
             .onFailure { error -> Log.w(TAG, "attach PlayerView[$index] failed", error) }
+        // SMCPKG_SUPPORT>>>Cursor017
+        // Surface often arrives after setVideo prepared. Kick play on the live instance.
+        if (autoplayWanted[index] && player.mediaItemCount > 0) {
+            player.playWhenReady = true
+            runCatching { player.play() }
+                .onFailure { error -> Log.w(TAG, "attach play[$index] failed", error) }
+        }
+        // SMCPKG_SUPPORT<<<Cursor017
     }
+
+    // SMCPKG_SUPPORT>>>Cursor017
+    /**
+     * Play/Pause overlay: always the live ExoPlayer for [index], after re-binding
+     * its TextureView. Isolation: never touches other cells.
+     */
+    fun togglePlay(index: Int) {
+        if (released || index !in players.indices) return
+        val player = players[index]
+        runCatching { boundViews[index]?.player = player }
+        if (player.isPlaying) {
+            autoplayWanted[index] = false
+            player.pause()
+            return
+        }
+        autoplayWanted[index] = true
+        player.playWhenReady = true
+        if (player.playbackState == Player.STATE_IDLE && player.mediaItemCount > 0) {
+            runCatching { player.prepare() }
+                .onFailure { error -> Log.w(TAG, "toggle prepare[$index] failed", error) }
+        }
+        runCatching { player.play() }
+            .onFailure { error -> Log.w(TAG, "toggle play[$index] failed", error) }
+    }
+    // SMCPKG_SUPPORT<<<Cursor017
 
     fun detachPlayerView(index: Int, view: PlayerView) {
         if (index !in players.indices) return
@@ -216,8 +259,8 @@ class QuadPlayerController(
     // SMCPKG_SUPPORT<<<Cursor013
 
     /**
-     * Stop/clear the target player and detach its TextureView **before** prepare.
-     * One swap at a time so FFmpeg JNI teardown cannot race a new surface attach.
+     * Affects only [index]. Attach that cell's TextureView, then prepare and play.
+     * Siblings are not paused or rebound.
      */
     // SMCPKG_SUPPORT>>>Cursor016
     /**
@@ -229,45 +272,82 @@ class QuadPlayerController(
         // Never stop/clear a cell because its URI slot is still empty.
         if (uri == null) return
         swapMutexes[index].withLock {
-            if (released) return
-            val player = players[index]
-            val existing = player.currentMediaItem?.localConfiguration?.uri
-            val alreadyReady = existing?.toString() == uri.toString() &&
-                player.playbackState != Player.STATE_IDLE &&
-                player.playerError == null
-            if (alreadyReady) {
-                player.playWhenReady = playWhenReady
-                if (playWhenReady) {
-                    runCatching { player.play() }
-                }
-                return@withLock
+            // SMCPKG_SUPPORT>>>Cursor017
+            // 1.0.6 detached PlayerView then prepared. Empty cells and picker-close
+            // races left boundViews[index] null, so rebound?.player was a no-op.
+            // MediaCodec then waited forever for a surface → STATE_BUFFERING at 00:00.
+            // Play() was a no-op (already playWhenReady). Attach surface FIRST.
+            // if (released) return
+            // val player = players[index]
+            // ... view?.player = null; stop; delay; prepare; rebound?.player = player; play()
+            if (released) return@withLock
+            autoplayWanted[index] = playWhenReady
+            withContext(NonCancellable) {
+                applyVideoOnCell(index, uri, playWhenReady)
             }
-            val view = boundViews[index]
-            runCatching { view?.player = null }
-            runCatching {
-                player.stop()
-                player.clearMediaItems()
-            }.onFailure { error ->
-                Log.w(TAG, "stop/clear player[$index] failed", error)
-            }
-            yield()
-            delay(SWAP_TEARDOWN_MS)
-            runCatching {
-                player.setMediaSource(createMediaSource(uri))
-                player.prepare()
-                player.volume = 1f
-                player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
-            }.onFailure { error ->
-                Log.w(TAG, "prepare player[$index] failed", error)
-            }
+            // SMCPKG_SUPPORT<<<Cursor017
+        }
+    }
+
+    // SMCPKG_SUPPORT>>>Cursor017
+    private suspend fun applyVideoOnCell(index: Int, uri: Uri, playWhenReady: Boolean) {
+        val player = players[index]
+        val existing = player.currentMediaItem?.localConfiguration?.uri
+        val alreadyReady = existing?.toString() == uri.toString() &&
+            player.playbackState != Player.STATE_IDLE &&
+            player.playerError == null
+        if (alreadyReady) {
+            attachSurfaceNow(index)
             player.playWhenReady = playWhenReady
-            val rebound = boundViews[index] ?: view
-            runCatching { rebound?.player = player }
             if (playWhenReady) {
                 runCatching { player.play() }
             }
+            return
+        }
+        runCatching {
+            player.stop()
+            player.clearMediaItems()
+        }.onFailure { error ->
+            Log.w(TAG, "stop/clear player[$index] failed", error)
+        }
+        yield()
+        delay(SWAP_TEARDOWN_MS)
+        // Wait until VideoCell's AndroidView has bound this slot (first pick).
+        val view = awaitBoundView(index)
+        runCatching { (view ?: boundViews[index])?.player = player }
+            .onFailure { error -> Log.w(TAG, "pre-prepare attach[$index] failed", error) }
+        runCatching {
+            player.setMediaSource(createMediaSource(uri))
+            player.prepare()
+            player.volume = 1f
+            player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
+        }.onFailure { error ->
+            Log.w(TAG, "prepare player[$index] failed", error)
+        }
+        attachSurfaceNow(index)
+        player.playWhenReady = playWhenReady
+        if (playWhenReady) {
+            runCatching { player.play() }
+                .onFailure { error -> Log.w(TAG, "play[$index] failed", error) }
         }
     }
+
+    private suspend fun awaitBoundView(index: Int): PlayerView? {
+        repeat(SURFACE_WAIT_FRAMES) {
+            boundViews[index]?.let { return it }
+            delay(SURFACE_WAIT_FRAME_MS)
+        }
+        return boundViews[index]
+    }
+
+    private fun attachSurfaceNow(index: Int) {
+        if (released || index !in players.indices) return
+        val player = players[index]
+        val view = boundViews[index] ?: return
+        runCatching { view.player = player }
+            .onFailure { error -> Log.w(TAG, "attach surface[$index] failed", error) }
+    }
+    // SMCPKG_SUPPORT<<<Cursor017
     // SMCPKG_SUPPORT<<<Cursor016
 
     private fun detachSurface(index: Int) {
@@ -305,6 +385,22 @@ class QuadPlayerController(
             }
         }
     }
+
+    // SMCPKG_SUPPORT>>>Cursor017
+    private inner class AutoPlayOnReadyListener(
+        private val playerIndex: Int,
+    ) : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (released || !autoplayWanted[playerIndex]) return
+            if (playbackState != Player.STATE_READY) return
+            val player = players[playerIndex]
+            attachSurfaceNow(playerIndex)
+            player.playWhenReady = true
+            runCatching { player.play() }
+                .onFailure { error -> Log.w(TAG, "ready play[$playerIndex] failed", error) }
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor017
     // SMCPKG_SUPPORT<<<Cursor014
 
     private fun createMediaSource(uri: Uri): MediaSource {
@@ -386,6 +482,10 @@ class QuadPlayerController(
         const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 5_000
         const val TARGET_BUFFER_BYTES = 6 * 1024 * 1024
         const val SWAP_TEARDOWN_MS = 48L
+        // SMCPKG_SUPPORT>>>Cursor017
+        private const val SURFACE_WAIT_FRAMES = 32
+        private const val SURFACE_WAIT_FRAME_MS = 16L
+        // SMCPKG_SUPPORT<<<Cursor017
         private const val TAG = "TetraViewPlayer"
         // SMCPKG_SUPPORT<<<Cursor014
         // Longer than the 5s default so a corrupt AVI video index can "join"

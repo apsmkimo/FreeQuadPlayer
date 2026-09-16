@@ -78,6 +78,9 @@ fun CellPlaybackBar(
     player: ExoPlayer,
     onPickVideo: () -> Unit,
     modifier: Modifier = Modifier,
+    // SMCPKG_SUPPORT>>>Cursor017
+    onTogglePlay: (() -> Unit)? = null,
+    // SMCPKG_SUPPORT<<<Cursor017
 ) {
     var isPlaying by remember(player) { mutableStateOf(player.isPlaying) }
     var durationMs by remember(player) { mutableLongStateOf(resolvedDuration(player)) }
@@ -133,11 +136,22 @@ fun CellPlaybackBar(
     ) {
         IconButton(
             onClick = {
-                if (player.isPlaying) {
+                // SMCPKG_SUPPORT>>>Cursor017
+                // if (player.isPlaying) {
+                //     player.pause()
+                // } else {
+                //     player.play()
+                // }
+                // Always drive the live ExoPlayer: playWhenReady + play() after swap.
+                if (onTogglePlay != null) {
+                    onTogglePlay()
+                } else if (player.isPlaying) {
                     player.pause()
                 } else {
+                    player.playWhenReady = true
                     player.play()
                 }
+                // SMCPKG_SUPPORT<<<Cursor017
             },
         ) {
             Icon(
