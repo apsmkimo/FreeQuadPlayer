@@ -18,7 +18,6 @@
 
 package com.example.quadvideoplayer
 
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -28,7 +27,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.quadvideoplayer.ui.QuadPlayerScreen
+import com.example.quadvideoplayer.ui.TetraViewApp
 import com.example.quadvideoplayer.ui.theme.QuadVideoPlayerTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,8 +35,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // SMCPKG_SUPPORT>>>Cursor005
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        // requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         // SMCPKG_SUPPORT<<<Cursor005
+        // SMCPKG_SUPPORT>>>Cursor012
+        // Orientation is applied per layout: portrait for 1x4, landscape for 2x2.
+        // SMCPKG_SUPPORT<<<Cursor012
         // SMCPKG_SUPPORT>>>Cursor004
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes = window.attributes.apply {
@@ -49,7 +51,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             QuadVideoPlayerTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    QuadPlayerScreen()
+                    // SMCPKG_SUPPORT>>>Cursor012
+                    // QuadPlayerScreen()
+                    TetraViewApp()
+                    // SMCPKG_SUPPORT<<<Cursor012
                 }
             }
         }

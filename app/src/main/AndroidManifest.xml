@@ -11,18 +11,19 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuadVideoPlayer">
         <!-- SMCPKG_SUPPORT>>>Cursor005 was: android:screenOrientation="fullSensor" -->
+        <!-- SMCPKG_SUPPORT>>>Cursor012 was: android:screenOrientation="landscape" -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
             android:resizeableActivity="true"
-            android:screenOrientation="landscape"
+            android:screenOrientation="unspecified"
             android:theme="@style/Theme.QuadVideoPlayer"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

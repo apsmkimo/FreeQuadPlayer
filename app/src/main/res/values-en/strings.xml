@@ -27,4 +27,12 @@
     <string name="cell_pause">Pause</string>
     <string name="cell_mute">Mute</string>
     <string name="cell_unmute">Unmute</string>
+    <!-- SMCPKG_SUPPORT>>>Cursor012 -->
+    <string name="layout_selection_title">Choose a layout</string>
+    <string name="layout_vertical_title">Vertical Mode (1x4 Stack)</string>
+    <string name="layout_vertical_body">Portrait orientation. Four players stacked top-to-bottom, full width each, FIT letterbox like 2x2.</string>
+    <string name="layout_landscape_title">Landscape Mode (2x2 Grid)</string>
+    <string name="layout_landscape_body">Force landscape and keep the current 2x2 grid.</string>
+    <string name="change_layout">Change layout</string>
+    <!-- SMCPKG_SUPPORT<<<Cursor012 -->
 </resources>
