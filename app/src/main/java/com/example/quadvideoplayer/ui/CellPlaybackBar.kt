@@ -1,17 +1,26 @@
 package com.example.quadvideoplayer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,12 +33,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.quadvideoplayer.R
+import com.example.quadvideoplayer.data.LocalVideoStore
+import kotlin.math.abs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -43,6 +56,10 @@ fun CellPlaybackBar(
     var durationMs by remember(player) { mutableLongStateOf(resolvedDuration(player)) }
     var sliderValue by remember(player) { mutableFloatStateOf(player.currentPosition.toFloat()) }
     var isSeeking by remember { mutableStateOf(false) }
+    var volume by remember(player) { mutableFloatStateOf(player.volume.coerceIn(0f, 1f)) }
+    var lastAudibleVolume by remember(player) {
+        mutableFloatStateOf(player.volume.takeIf { it > 0f } ?: 1f)
+    }
 
     DisposableEffect(player) {
         val listener = object : Player.Listener {
@@ -54,6 +71,10 @@ fun CellPlaybackBar(
                 }
                 if (!isSeeking) {
                     sliderValue = player.currentPosition.toFloat()
+                }
+                volume = player.volume.coerceIn(0f, 1f)
+                if (volume > 0f) {
+                    lastAudibleVolume = volume
                 }
             }
         }
@@ -73,6 +94,8 @@ fun CellPlaybackBar(
     }
 
     val maxValue = durationMs.toFloat().coerceAtLeast(1f)
+    val elapsedMs = sliderValue.toLong().coerceAtLeast(0L)
+    val isMuted = volume <= 0f
 
     Row(
         modifier = modifier
@@ -99,6 +122,41 @@ fun CellPlaybackBar(
             )
         }
 
+        // SMCPKG_SUPPORT>>>Cursor006
+        VolumeGestureIcon(
+            isMuted = isMuted,
+            onToggleMute = {
+                if (player.volume > 0f) {
+                    lastAudibleVolume = player.volume
+                    player.volume = 0f
+                    volume = 0f
+                } else {
+                    val restored = lastAudibleVolume.takeIf { it > 0f } ?: 1f
+                    player.volume = restored
+                    volume = restored
+                }
+            },
+            onVolumeDelta = { delta ->
+                val next = (player.volume + delta).coerceIn(0f, 1f)
+                player.volume = next
+                volume = next
+                if (next > 0f) {
+                    lastAudibleVolume = next
+                }
+            },
+        )
+
+        Text(
+            text = LocalVideoStore.formatDuration(durationMs),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .padding(end = 4.dp),
+        )
+        // SMCPKG_SUPPORT<<<Cursor006
+
         Slider(
             value = sliderValue.coerceIn(0f, maxValue),
             onValueChange = { value ->
@@ -121,14 +179,18 @@ fun CellPlaybackBar(
             ),
         )
 
-        // SMCPKG_SUPPORT>>>Cursor005
-        // TextButton(onClick = onPickVideo) {
-        //     Text(
-        //         text = stringResource(R.string.change_video),
-        //         style = MaterialTheme.typography.labelLarge,
-        //         color = Color.White,
-        //     )
-        // }
+        // SMCPKG_SUPPORT>>>Cursor006
+        Text(
+            text = LocalVideoStore.formatDuration(elapsedMs),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .padding(start = 4.dp),
+        )
+        // SMCPKG_SUPPORT<<<Cursor006
+
         IconButton(onClick = onPickVideo) {
             Icon(
                 imageVector = Icons.Outlined.FolderOpen,
@@ -136,7 +198,60 @@ fun CellPlaybackBar(
                 tint = Color.White,
             )
         }
-        // SMCPKG_SUPPORT<<<Cursor005
+    }
+}
+
+@Composable
+private fun VolumeGestureIcon(
+    isMuted: Boolean,
+    onToggleMute: () -> Unit,
+    onVolumeDelta: (Float) -> Unit,
+) {
+    val touchSlopPx = 16f
+    val dragSensitivity = 280f
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    var dragged = false
+                    var lastY = down.position.y
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull() ?: break
+                        if (!change.pressed) {
+                            break
+                        }
+                        val dy = change.position.y - lastY
+                        if (!dragged && abs(change.position.y - down.position.y) > touchSlopPx) {
+                            dragged = true
+                        }
+                        if (dragged) {
+                            // Finger up (negative dy) increases volume; down decreases it.
+                            onVolumeDelta(-dy / dragSensitivity)
+                            change.consume()
+                        }
+                        lastY = change.position.y
+                    }
+                    if (!dragged) {
+                        onToggleMute()
+                    }
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = if (isMuted) {
+                Icons.AutoMirrored.Filled.VolumeOff
+            } else {
+                Icons.AutoMirrored.Filled.VolumeUp
+            },
+            contentDescription = stringResource(
+                if (isMuted) R.string.cell_unmute else R.string.cell_mute,
+            ),
+            tint = Color.White,
+        )
     }
 }
 

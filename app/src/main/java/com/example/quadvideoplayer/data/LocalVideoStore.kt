@@ -17,6 +17,10 @@ object LocalVideoStore {
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.DISPLAY_NAME,
             MediaStore.Video.Media.DURATION,
+            // SMCPKG_SUPPORT>>>Cursor006
+            MediaStore.Video.Media.BUCKET_ID,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+            // SMCPKG_SUPPORT<<<Cursor006
         )
         val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
 
@@ -31,6 +35,8 @@ object LocalVideoStore {
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val bucketIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID)
+            val bucketNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
                 videos += LocalVideo(
@@ -38,10 +44,26 @@ object LocalVideoStore {
                     uri = ContentUris.withAppendedId(collection, id),
                     displayName = cursor.getString(nameColumn).orEmpty().ifBlank { "video_$id" },
                     durationMs = cursor.getLong(durationColumn).coerceAtLeast(0L),
+                    bucketId = cursor.getLong(bucketIdColumn),
+                    bucketDisplayName = cursor.getString(bucketNameColumn).orEmpty().ifBlank { "Folder" },
                 )
             }
         }
         return videos
+    }
+
+    fun groupByFolder(videos: List<LocalVideo>): List<LocalVideoFolder> {
+        return videos
+            .groupBy { it.bucketId }
+            .map { (bucketId, items) ->
+                LocalVideoFolder(
+                    bucketId = bucketId,
+                    displayName = items.first().bucketDisplayName,
+                    videoCount = items.size,
+                    coverUri = items.first().uri,
+                )
+            }
+            .sortedBy { it.displayName.lowercase() }
     }
 
     fun formatDuration(durationMs: Long): String {
@@ -49,10 +71,17 @@ object LocalVideoStore {
         val hours = totalSeconds / 3600L
         val minutes = (totalSeconds % 3600L) / 60L
         val seconds = totalSeconds % 60L
+        // SMCPKG_SUPPORT>>>Cursor006
+        // return if (hours > 0L) {
+        //     "%d:%02d:%02d".format(hours, minutes, seconds)
+        // } else {
+        //     "%d:%02d".format(minutes, seconds)
+        // }
         return if (hours > 0L) {
             "%d:%02d:%02d".format(hours, minutes, seconds)
         } else {
-            "%d:%02d".format(minutes, seconds)
+            "%02d:%02d".format(minutes, seconds)
         }
+        // SMCPKG_SUPPORT<<<Cursor006
     }
 }

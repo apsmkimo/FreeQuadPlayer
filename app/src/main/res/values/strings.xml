@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">QuadVideoPlayer</string>
+    <string name="app_name">TetraView</string>
     <string name="master_play">全部播放</string>
     <string name="master_pause">全部暫停</string>
     <string name="pick_video">選擇影片</string>
@@ -10,6 +10,9 @@
     <string name="placeholder_title">尚未選擇影片</string>
     <string name="placeholder_hint">點此選擇本機影片</string>
     <string name="picker_title">選擇本機影片</string>
+    <string name="picker_folders_title">Folders</string>
+    <string name="picker_folder_count">%1$d videos</string>
+    <string name="picker_back">Back</string>
     <string name="picker_close">關閉</string>
     <string name="picker_empty">找不到本機影片</string>
     <string name="unmuted_label">播放聲音</string>
@@ -22,4 +25,6 @@
     <string name="cell_index">畫面 %1$d</string>
     <string name="cell_play">播放</string>
     <string name="cell_pause">暫停</string>
+    <string name="cell_mute">Mute</string>
+    <string name="cell_unmute">Unmute</string>
 </resources>
