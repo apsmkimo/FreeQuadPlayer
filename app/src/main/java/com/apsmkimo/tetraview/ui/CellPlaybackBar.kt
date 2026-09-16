@@ -45,7 +45,9 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+// SMCPKG_SUPPORT>>>Cursor022
+// import androidx.compose.material3.IconButton
+// SMCPKG_SUPPORT<<<Cursor022
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
