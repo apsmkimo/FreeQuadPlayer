@@ -67,8 +67,12 @@ fun VideoCell(
     attachSurface: Boolean = true,
     // SMCPKG_SUPPORT<<<Cursor013
     // SMCPKG_SUPPORT>>>Cursor014
-    onBindPlayerView: (PlayerView?) -> Unit = {},
+    // onBindPlayerView: (PlayerView?) -> Unit = {},
     // SMCPKG_SUPPORT<<<Cursor014
+    // SMCPKG_SUPPORT>>>Cursor015
+    onAttachPlayerView: (PlayerView) -> Unit = {},
+    onDetachPlayerView: (PlayerView) -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor015
 ) {
     // SMCPKG_SUPPORT>>>Cursor004
     // val shape = RoundedCornerShape(12.dp)
@@ -150,13 +154,19 @@ fun VideoCell(
                     // SMCPKG_SUPPORT<<<Cursor005
                     // SMCPKG_SUPPORT>>>Cursor014
                     // view.player = player
-                    onBindPlayerView(view)
+                    // onBindPlayerView(view)
                     // SMCPKG_SUPPORT<<<Cursor014
+                    // SMCPKG_SUPPORT>>>Cursor015
+                    onAttachPlayerView(view)
+                    // SMCPKG_SUPPORT<<<Cursor015
                 },
                 onRelease = { view ->
                     // SMCPKG_SUPPORT>>>Cursor014
-                    onBindPlayerView(null)
+                    // onBindPlayerView(null)
                     // SMCPKG_SUPPORT<<<Cursor014
+                    // SMCPKG_SUPPORT>>>Cursor015
+                    onDetachPlayerView(view)
+                    // SMCPKG_SUPPORT<<<Cursor015
                     view.player = null
                 },
                 modifier = Modifier.fillMaxSize(),
