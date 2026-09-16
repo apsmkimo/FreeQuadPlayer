@@ -2,13 +2,15 @@
 
 ## Overview
 
-TetraView is an open-source Android app for watching up to four local videos at once. It places four independent Media3 ExoPlayer instances in a 1×4 portrait stack or a 2×2 landscape grid so you can compare, mix, and review device footage side by side—with simultaneous audio, per-cell controls, and strong support for legacy formats such as older AVI files.
+TetraView is an open-source Android app for watching up to four local videos at once. Each launch you pick one of four layouts: a 2×2 landscape grid, a 1×4 portrait stack, a 1×2 portrait stack, or a 2×1 landscape pair. Independent Media3 ExoPlayer instances compare, mix, and review device footage—with simultaneous audio, per-cell controls, and strong support for legacy formats such as older AVI files.
 
 ## Key Features
 
-- **Layout picker on launch** — Choose **Vertical Mode (1x4 Stack)** (portrait, four full-width players) or **Landscape Mode (2x2 Grid)**. The choice is stored in SharedPreferences (`tetraview_layout` / `player_layout`) and restored on the next launch. Tap the layout button in the player (top-right) to return to the picker.
-- **2x2 Multi-Screen Grid Playback** — Stream four independent local videos simultaneously in a landscape 2×2 grid.
-- **1x4 Vertical Stack Playback** — The same four players stacked top-to-bottom in portrait, hairline separators, FIT letterbox.
+- **Layout picker every launch** — Four name-only buttons: **2x2 Grid**, **1x stack (1x4)**, **1x2 Vertical**, **2x1 Horizontal**. The choice is in-session only (not stored). Cold start always shows the picker. Tap the layout button in the player (top-right) to switch without disposing players.
+- **2x2 Grid** — Four independent local videos in a landscape 2×2 grid.
+- **1x stack (1x4)** — Four players stacked top-to-bottom in portrait, hairline separators, FIT letterbox.
+- **1x2 Vertical** — Two players stacked top-to-bottom in portrait.
+- **2x1 Horizontal** — Two players side-by-side in landscape.
 - **Intelligent Aspect-Ratio Matching** — Each cell uses FIT scaling so videos keep their native aspect ratio, with letterboxing or pillarboxing (black bars) when dimensions do not match the cell.
 - **Folder-Grouped Video Picker** — Browse local videos by device directory (MediaStore buckets) with Coil thumbnails, file names, and durations instead of a flat system file browser.
 - **Ultra-Thin Borders & Clean UI** — No title or action bar; cells maximize the viewing area with hairline separators only.
@@ -28,7 +30,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 **Package ID:** `com.example.quadvideoplayer`  
 **SDK:** minSdk 24 · compileSdk 36 · targetSdk 35  
-**Version:** 1.0.8 (`versionCode` 108)
+**Version:** 1.0.9 (`versionCode` 109)
 
 Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven Central. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module with a prebuilt `libffmpegJNI.so` (FFmpeg 6.0). Modern H.264/HEVC streams stay on hardware MediaCodec; FFmpeg is preferred for allowlisted legacy codecs. See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md) for native rebuild notes.
 
@@ -51,7 +53,7 @@ GitHub Actions builds a debug APK on every push to `main` and uploads it as an a
 8. Copy the APK to an Android device or emulator (minSdk 24).
 9. Allow installation from that source if prompted, then open the APK to install TetraView.
 10. Grant video-read permission when asked (`READ_MEDIA_VIDEO` on Android 13+, otherwise `READ_EXTERNAL_STORAGE`).
-11. On first launch, choose Vertical Mode (1x4 Stack) or Landscape Mode (2x2 Grid). Tap an empty cell, pick a folder, then a video. Tap a playing cell to show overlay controls. Use the top-right layout button to switch modes later.
+11. Every launch, tap one of **2x2 Grid**, **1x stack (1x4)**, **1x2 Vertical**, or **2x1 Horizontal**. Tap an empty cell, pick a folder, then a video. Tap a playing cell to show overlay controls. Use the top-right layout button to switch modes later.
 
 ### Build from source (optional)
 
@@ -71,4 +73,4 @@ Local `./gradlew assembleDebug` and GitHub Actions CI use the same committed deb
 - Alias: `androiddebugkey`
 - Store / key password: `android`
 
-`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.8 → 108).
+`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.9 → 109).

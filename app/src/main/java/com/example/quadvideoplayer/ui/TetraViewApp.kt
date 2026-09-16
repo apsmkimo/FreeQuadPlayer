@@ -34,40 +34,55 @@ import com.example.quadvideoplayer.data.LayoutPreferences
 import com.example.quadvideoplayer.data.PlayerLayout
 
 /**
- * First launch shows [LauncherSelectionScreen]. After a choice is persisted,
- * the matching player grid opens. Returning to selection overlays the picker
- * so the four players are not disposed.
+ * Every cold start shows [LauncherSelectionScreen]. The chosen layout is
+ * in-session only (not written to prefs). Change-layout overlays the picker
+ * so existing players are not disposed.
  */
 @Composable
 fun TetraViewApp() {
     val context = LocalContext.current
     val activity = context as Activity
-    var persisted by remember { mutableStateOf(LayoutPreferences.load(context)) }
-    var layout by remember { mutableStateOf(persisted ?: PlayerLayout.LANDSCAPE_2X2) }
-    var showSelection by remember { mutableStateOf(persisted == null) }
+    // SMCPKG_SUPPORT>>>Cursor019
+    // var persisted by remember { mutableStateOf(LayoutPreferences.load(context)) }
+    // var layout by remember { mutableStateOf(persisted ?: PlayerLayout.LANDSCAPE_2X2) }
+    // var showSelection by remember { mutableStateOf(persisted == null) }
+    var layout by remember { mutableStateOf<PlayerLayout?>(null) }
+    var showSelection by remember { mutableStateOf(true) }
+    // SMCPKG_SUPPORT<<<Cursor019
+
+    LaunchedEffect(Unit) {
+        LayoutPreferences.clear(context)
+    }
 
     fun applyLayout(newLayout: PlayerLayout) {
-        LayoutPreferences.save(context, newLayout)
-        persisted = newLayout
+        // SMCPKG_SUPPORT>>>Cursor019
+        // LayoutPreferences.save(context, newLayout)
+        // persisted = newLayout
+        // SMCPKG_SUPPORT<<<Cursor019
         layout = newLayout
         showSelection = false
         activity.requestedOrientation = newLayout.orientation
     }
 
     LaunchedEffect(showSelection, layout) {
-        activity.requestedOrientation = if (showSelection) {
+        activity.requestedOrientation = if (showSelection && layout == null) {
             ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         } else {
-            layout.orientation
+            layout?.orientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
-    if (persisted == null && showSelection) {
+    // SMCPKG_SUPPORT>>>Cursor019
+    // if (persisted == null && showSelection) {
+    //     LauncherSelectionScreen(onLayoutSelected = ::applyLayout)
+    // } else { ... overlay picker ... }
+    val selected = layout
+    if (selected == null) {
         LauncherSelectionScreen(onLayoutSelected = ::applyLayout)
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             QuadPlayerScreen(
-                layout = layout,
+                layout = selected,
                 onChangeLayout = { showSelection = true },
             )
             if (showSelection) {
@@ -78,4 +93,5 @@ fun TetraViewApp() {
             }
         }
     }
+    // SMCPKG_SUPPORT<<<Cursor019
 }

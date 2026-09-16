@@ -20,33 +20,19 @@ package com.example.quadvideoplayer.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.quadvideoplayer.R
 import com.example.quadvideoplayer.data.PlayerLayout
@@ -61,129 +47,56 @@ fun LauncherSelectionScreen(
         BackHandler(onBack = onCancel)
     }
 
+    // SMCPKG_SUPPORT>>>Cursor019
+    // Column(...) {
+    //     Text(app_name); Text(layout_selection_title)
+    //     LayoutOptionCard(title, body, preview, ...)
+    // }
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        Text(
-            text = stringResource(R.string.layout_selection_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        LayoutOptionCard(
-            title = stringResource(R.string.layout_vertical_title),
-            body = stringResource(R.string.layout_vertical_body),
-            preview = { VerticalStackPreview() },
-            accent = Color(0xFF8AB4F8),
-            onClick = { onLayoutSelected(PlayerLayout.VERTICAL_1X4) },
-        )
-        LayoutOptionCard(
-            title = stringResource(R.string.layout_landscape_title),
-            body = stringResource(R.string.layout_landscape_body),
-            preview = { LandscapeGridPreview() },
-            accent = Color(0xFF3DDC84),
+        LayoutNameButton(
+            label = stringResource(R.string.layout_2x2_grid),
             onClick = { onLayoutSelected(PlayerLayout.LANDSCAPE_2X2) },
         )
+        LayoutNameButton(
+            label = stringResource(R.string.layout_1x4_stack),
+            onClick = { onLayoutSelected(PlayerLayout.VERTICAL_1X4) },
+        )
+        LayoutNameButton(
+            label = stringResource(R.string.layout_1x2_vertical),
+            onClick = { onLayoutSelected(PlayerLayout.VERTICAL_1X2) },
+        )
+        LayoutNameButton(
+            label = stringResource(R.string.layout_2x1_horizontal),
+            onClick = { onLayoutSelected(PlayerLayout.LANDSCAPE_2X1) },
+        )
     }
+    // SMCPKG_SUPPORT<<<Cursor019
 }
 
 @Composable
-private fun LayoutOptionCard(
-    title: String,
-    body: String,
-    preview: @Composable () -> Unit,
-    accent: Color,
+private fun LayoutNameButton(
+    label: String,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(20.dp)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, accent.copy(alpha = 0.45f), shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        preview()
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = body,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 6.dp),
-            )
-        }
+        Text(text = label)
     }
 }
 
-@Composable
-private fun VerticalStackPreview() {
-    Column(
-        modifier = Modifier
-            .width(52.dp)
-            .height(88.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF0B0D12))
-            .padding(4.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        repeat(4) { MiniPane(Modifier.weight(1f).fillMaxWidth()) }
-    }
-}
-
-@Composable
-private fun LandscapeGridPreview() {
-    Column(
-        modifier = Modifier
-            .width(88.dp)
-            .height(56.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF0B0D12))
-            .padding(4.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-    ) {
-        repeat(2) {
-            Row(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                MiniPane(Modifier.weight(1f).fillMaxSize())
-                MiniPane(Modifier.weight(1f).fillMaxSize())
-            }
-        }
-    }
-}
-
-@Composable
-private fun MiniPane(modifier: Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(3.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFF2A3140), Color(0xFF1A2030)),
-                ),
-            ),
-    )
-}
+// SMCPKG_SUPPORT>>>Cursor019
+// private fun LayoutOptionCard(...) { title + body + preview }
+// private fun VerticalStackPreview() { ... }
+// private fun LandscapeGridPreview() { ... }
+// private fun MiniPane(...) { ... }
+// SMCPKG_SUPPORT<<<Cursor019

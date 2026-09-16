@@ -19,33 +19,52 @@
 package com.example.quadvideoplayer.data
 
 import android.content.pm.ActivityInfo
-import com.example.quadvideoplayer.player.QuadPlayerController
 
 /**
- * Persisted player grid. Vertical 1x4 is portrait; landscape 2x2 keeps the original grid.
+ * In-session player grid. Not persisted. Portrait for stacked modes;
+ * landscape for 2x2 and 2x1.
  */
 enum class PlayerLayout(
-    val prefValue: String,
     val columns: Int,
+    val rows: Int,
+    val paneCount: Int,
     val orientation: Int,
 ) {
+    // SMCPKG_SUPPORT>>>Cursor019
+    // VERTICAL_1X4(prefValue = "vertical_1x4", columns = 1, portrait)
+    // LANDSCAPE_2X2(prefValue = "landscape_2x2", columns = 2, landscape)
+    // val rows get() = PLAYER_COUNT / columns
+    LANDSCAPE_2X2(
+        columns = 2,
+        rows = 2,
+        paneCount = 4,
+        orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
+    ),
     VERTICAL_1X4(
-        prefValue = "vertical_1x4",
         columns = 1,
+        rows = 4,
+        paneCount = 4,
         orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
     ),
-    LANDSCAPE_2X2(
-        prefValue = "landscape_2x2",
+    VERTICAL_1X2(
+        columns = 1,
+        rows = 2,
+        paneCount = 2,
+        orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
+    ),
+    LANDSCAPE_2X1(
         columns = 2,
+        rows = 1,
+        paneCount = 2,
         orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
     );
-
-    val rows: Int
-        get() = QuadPlayerController.PLAYER_COUNT / columns
+    // SMCPKG_SUPPORT<<<Cursor019
 
     companion object {
-        fun fromPref(value: String?): PlayerLayout? {
-            return entries.firstOrNull { it.prefValue == value }
-        }
+        // SMCPKG_SUPPORT>>>Cursor019
+        // fun fromPref(value: String?): PlayerLayout? {
+        //     return entries.firstOrNull { it.prefValue == value }
+        // }
+        // SMCPKG_SUPPORT<<<Cursor019
     }
 }

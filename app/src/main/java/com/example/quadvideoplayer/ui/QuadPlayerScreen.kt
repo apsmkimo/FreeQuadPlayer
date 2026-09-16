@@ -109,10 +109,21 @@ fun QuadPlayerScreen(
     // SMCPKG_SUPPORT>>>Cursor015
     LaunchedEffect(layout) {
         delay(32)
+        // SMCPKG_SUPPORT>>>Cursor019
+        // Pause panes that are not composed in 2-window modes so they
+        // cannot play audio without a surface. Visible cells are restored.
+        for (index in layout.paneCount until QuadPlayerController.PLAYER_COUNT) {
+            controller.players.getOrNull(index)?.pause()
+        }
+        // SMCPKG_SUPPORT<<<Cursor019
         controller.reattachAllBoundViews()
         controller.restorePlayback(
             List(QuadPlayerController.PLAYER_COUNT) { index ->
-                controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                // SMCPKG_SUPPORT>>>Cursor019
+                // controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                index < layout.paneCount &&
+                    controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                // SMCPKG_SUPPORT<<<Cursor019
             },
         )
     }
@@ -155,7 +166,10 @@ fun QuadPlayerScreen(
     //     }
     // }
     // Per-index effect: only THIS slot's URI. Empty slots do not call setVideo(null).
-    repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+    // SMCPKG_SUPPORT>>>Cursor019
+    // repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+    repeat(layout.paneCount) { index ->
+    // SMCPKG_SUPPORT<<<Cursor019
         val uriString = videoUriStrings.getOrElse(index) { "" }
         key(index) {
             LaunchedEffect(uriString) {
@@ -228,7 +242,10 @@ fun QuadPlayerScreen(
         val index = pickingIndex
         showPicker = false
         pendingPicker = false
-        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        // SMCPKG_SUPPORT>>>Cursor019
+        // if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        if (index !in 0 until layout.paneCount) return
+        // SMCPKG_SUPPORT<<<Cursor019
         // SMCPKG_SUPPORT>>>Cursor016
         // pendingPick = index to uri.toString()
         videoUriStrings = videoUriStrings.toMutableList().also { list ->
@@ -239,7 +256,10 @@ fun QuadPlayerScreen(
     }
 
     fun pickVideo(index: Int) {
-        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        // SMCPKG_SUPPORT>>>Cursor019
+        // if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        if (index !in 0 until layout.paneCount) return
+        // SMCPKG_SUPPORT<<<Cursor019
         pickingIndex = index
         if (VideoPermissions.hasReadAccess(context)) {
             hasPermission = true
@@ -399,6 +419,42 @@ private fun PlayerPaneGrid(
                 }
             }
         }
+
+        // SMCPKG_SUPPORT>>>Cursor019
+        PlayerLayout.VERTICAL_1X2 -> {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(2) { index ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    ) {
+                        key(index) { cell(index) }
+                    }
+                }
+            }
+        }
+
+        PlayerLayout.LANDSCAPE_2X1 -> {
+            Row(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(2) { index ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    ) {
+                        key(index) { cell(index) }
+                    }
+                }
+            }
+        }
+        // SMCPKG_SUPPORT<<<Cursor019
     }
 }
 // SMCPKG_SUPPORT<<<Cursor013

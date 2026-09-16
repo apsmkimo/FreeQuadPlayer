@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         // requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         // SMCPKG_SUPPORT<<<Cursor005
         // SMCPKG_SUPPORT>>>Cursor012
-        // Orientation is applied per layout: portrait for 1x4, landscape for 2x2.
+        // Orientation is applied per layout: portrait for 1x4/1x2, landscape for 2x2/2x1.
         // SMCPKG_SUPPORT<<<Cursor012
         // SMCPKG_SUPPORT>>>Cursor004
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
