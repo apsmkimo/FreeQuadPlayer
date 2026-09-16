@@ -151,6 +151,9 @@ fun VideoCell(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
+                        // SMCPKG_SUPPORT>>>Cursor018
+                        this.player = player
+                        // SMCPKG_SUPPORT<<<Cursor018
                     }
                     // SMCPKG_SUPPORT<<<Cursor014
                 },
@@ -166,8 +169,14 @@ fun VideoCell(
                     // onBindPlayerView(view)
                     // SMCPKG_SUPPORT<<<Cursor014
                     // SMCPKG_SUPPORT>>>Cursor015
-                    onAttachPlayerView(view)
+                    // onAttachPlayerView(view)
                     // SMCPKG_SUPPORT<<<Cursor015
+                    // SMCPKG_SUPPORT>>>Cursor018
+                    // Always assign the live ExoPlayer here so first-pick prepare
+                    // never races a PlayerView that has no player/surface.
+                    view.player = player
+                    onAttachPlayerView(view)
+                    // SMCPKG_SUPPORT<<<Cursor018
                 },
                 onRelease = { view ->
                     // SMCPKG_SUPPORT>>>Cursor014

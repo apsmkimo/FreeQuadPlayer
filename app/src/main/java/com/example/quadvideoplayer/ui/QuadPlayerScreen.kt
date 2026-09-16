@@ -163,7 +163,7 @@ fun QuadPlayerScreen(
                 // SMCPKG_SUPPORT>>>Cursor017
                 // First pick composes AndroidView in this same snapshot; wait one
                 // frame so attachPlayerView can bind the TextureView before prepare.
-                delay(16)
+                // delay(16)
                 // SMCPKG_SUPPORT<<<Cursor017
                 controller.setVideo(
                     index = index,
