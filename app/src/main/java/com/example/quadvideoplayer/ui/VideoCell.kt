@@ -62,7 +62,10 @@ fun VideoCell(
             // .clip(shape)
             // .border(2.dp, borderColor, shape)
             // SMCPKG_SUPPORT<<<Cursor004
-            .background(MaterialTheme.colorScheme.background)
+            // SMCPKG_SUPPORT>>>Cursor005
+            // .background(MaterialTheme.colorScheme.background)
+            .background(androidx.compose.ui.graphics.Color.Black)
+            // SMCPKG_SUPPORT<<<Cursor005
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
@@ -82,7 +85,11 @@ fun VideoCell(
                     PlayerView(context).apply {
                         useController = false
                         controllerAutoShow = false
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        // SMCPKG_SUPPORT>>>Cursor005
+                        // resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        setBackgroundColor(android.graphics.Color.BLACK)
+                        // SMCPKG_SUPPORT<<<Cursor005
                         setShutterBackgroundColor(android.graphics.Color.BLACK)
                         isClickable = false
                         isFocusable = false
@@ -95,7 +102,11 @@ fun VideoCell(
                 },
                 update = { view ->
                     view.useController = false
-                    view.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    // SMCPKG_SUPPORT>>>Cursor005
+                    // view.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    view.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    view.setBackgroundColor(android.graphics.Color.BLACK)
+                    // SMCPKG_SUPPORT<<<Cursor005
                     view.player = player
                 },
                 onRelease = { view ->

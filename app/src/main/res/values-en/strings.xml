@@ -4,13 +4,18 @@
     <string name="master_play">Play all</string>
     <string name="master_pause">Pause all</string>
     <string name="pick_video">Pick video</string>
-    <string name="change_video">Change</string>
+    <!-- SMCPKG_SUPPORT>>>Cursor005 -->
+    <!-- <string name="change_video">Change</string> -->
+    <!-- SMCPKG_SUPPORT<<<Cursor005 -->
     <string name="placeholder_title">No video selected</string>
     <string name="placeholder_hint">Tap to pick a local video</string>
+    <string name="picker_title">Choose a local video</string>
+    <string name="picker_close">Close</string>
+    <string name="picker_empty">No local videos found</string>
     <string name="unmuted_label">Audio on</string>
     <string name="muted_label">Muted</string>
     <string name="permission_needed_title">Local video access needed</string>
-    <string name="permission_needed_body">Grant access to browse videos on this device. You can also pick a file with the system picker without full gallery access.</string>
+    <string name="permission_needed_body">Grant access so the app can scan local videos and show a thumbnail list.</string>
     <string name="permission_grant">Grant permission</string>
     <string name="permission_settings">Open settings</string>
     <string name="permission_granted">Video read permission granted</string>

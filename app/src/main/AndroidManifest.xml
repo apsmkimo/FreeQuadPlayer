@@ -16,12 +16,13 @@
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuadVideoPlayer">
+        <!-- SMCPKG_SUPPORT>>>Cursor005 was: android:screenOrientation="fullSensor" -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
             android:resizeableActivity="true"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.QuadVideoPlayer"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

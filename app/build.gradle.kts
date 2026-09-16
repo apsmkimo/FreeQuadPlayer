@@ -74,4 +74,9 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
+
+    // SMCPKG_SUPPORT>>>Cursor005
+    implementation(libs.coil.compose)
+    implementation(libs.coil.video)
+    // SMCPKG_SUPPORT<<<Cursor005
 }

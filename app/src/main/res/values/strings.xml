@@ -4,13 +4,18 @@
     <string name="master_play">全部播放</string>
     <string name="master_pause">全部暫停</string>
     <string name="pick_video">選擇影片</string>
-    <string name="change_video">更換</string>
+    <!-- SMCPKG_SUPPORT>>>Cursor005 -->
+    <!-- <string name="change_video">更換</string> -->
+    <!-- SMCPKG_SUPPORT<<<Cursor005 -->
     <string name="placeholder_title">尚未選擇影片</string>
     <string name="placeholder_hint">點此選擇本機影片</string>
+    <string name="picker_title">選擇本機影片</string>
+    <string name="picker_close">關閉</string>
+    <string name="picker_empty">找不到本機影片</string>
     <string name="unmuted_label">播放聲音</string>
     <string name="muted_label">已靜音</string>
     <string name="permission_needed_title">需要本機影片讀取權限</string>
-    <string name="permission_needed_body">授權後可瀏覽裝置上的影片。你也可以直接用系統檔案選擇器挑選（不一定需要完整相簿權限）。</string>
+    <string name="permission_needed_body">授權後才能掃描本機影片並顯示縮圖清單。請先授予讀取權限。</string>
     <string name="permission_grant">授予權限</string>
     <string name="permission_settings">開啟設定</string>
     <string name="permission_granted">已授予影片讀取權限</string>
