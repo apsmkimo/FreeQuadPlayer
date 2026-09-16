@@ -62,6 +62,9 @@ fun VideoCell(
     videoUri: Uri?,
     onPickVideo: () -> Unit,
     modifier: Modifier = Modifier,
+    // SMCPKG_SUPPORT>>>Cursor013
+    attachSurface: Boolean = true,
+    // SMCPKG_SUPPORT<<<Cursor013
 ) {
     // SMCPKG_SUPPORT>>>Cursor004
     // val shape = RoundedCornerShape(12.dp)
@@ -97,6 +100,16 @@ fun VideoCell(
     ) {
         if (videoUri == null) {
             EmptyVideoPlaceholder(index = index)
+        // SMCPKG_SUPPORT>>>Cursor013
+        } else if (!attachSurface) {
+            // Keep a black placeholder while the picker is open so SurfaceView
+            // does not punch through the overlay or sit in a zero-size lazy slot.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(androidx.compose.ui.graphics.Color.Black),
+            )
+        // SMCPKG_SUPPORT<<<Cursor013
         } else {
             AndroidView(
                 factory = { context ->

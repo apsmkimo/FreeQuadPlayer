@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.decode.VideoFrameDecoder
+import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
 import com.example.quadvideoplayer.R
@@ -73,6 +75,11 @@ import com.example.quadvideoplayer.data.LocalVideoFolder
 import com.example.quadvideoplayer.data.LocalVideoStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+// SMCPKG_SUPPORT>>>Cursor013
+private const val THUMB_WIDTH_PX = 512
+private const val THUMB_HEIGHT_PX = 288
+// SMCPKG_SUPPORT<<<Cursor013
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +100,15 @@ fun VideoPickerScreen(
             LocalVideoStore.queryAll(context)
         }
     }
+
+    // SMCPKG_SUPPORT>>>Cursor013
+    DisposableEffect(Unit) {
+        val imageLoader = context.imageLoader
+        onDispose {
+            imageLoader.memoryCache?.clear()
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor013
 
     val loaded = videos
     val folders = remember(loaded) {
@@ -296,6 +312,10 @@ private fun VideoThumb(
             .data(uri)
             .decoderFactory(VideoFrameDecoder.Factory())
             .videoFrameMillis(0)
+            // SMCPKG_SUPPORT>>>Cursor013
+            // Cap decode size so folder grids do not keep full-resolution frames.
+            .size(THUMB_WIDTH_PX, THUMB_HEIGHT_PX)
+            // SMCPKG_SUPPORT<<<Cursor013
             .crossfade(true)
             .build(),
         contentDescription = contentDescription,
