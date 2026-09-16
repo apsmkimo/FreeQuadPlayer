@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">QuadVideoPlayer</string>
+    <string name="app_name">TetraView</string>
     <string name="master_play">Play all</string>
     <string name="master_pause">Pause all</string>
     <string name="pick_video">Pick video</string>
@@ -10,6 +10,9 @@
     <string name="placeholder_title">No video selected</string>
     <string name="placeholder_hint">Tap to pick a local video</string>
     <string name="picker_title">Choose a local video</string>
+    <string name="picker_folders_title">Folders</string>
+    <string name="picker_folder_count">%1$d videos</string>
+    <string name="picker_back">Back</string>
     <string name="picker_close">Close</string>
     <string name="picker_empty">No local videos found</string>
     <string name="unmuted_label">Audio on</string>
@@ -22,4 +25,6 @@
     <string name="cell_index">Pane %1$d</string>
     <string name="cell_play">Play</string>
     <string name="cell_pause">Pause</string>
+    <string name="cell_mute">Mute</string>
+    <string name="cell_unmute">Unmute</string>
 </resources>

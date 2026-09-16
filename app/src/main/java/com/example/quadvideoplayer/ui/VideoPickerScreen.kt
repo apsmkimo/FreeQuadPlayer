@@ -1,6 +1,7 @@
 package com.example.quadvideoplayer.ui
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +48,7 @@ import coil.request.ImageRequest
 import coil.request.videoFrameMillis
 import com.example.quadvideoplayer.R
 import com.example.quadvideoplayer.data.LocalVideo
+import com.example.quadvideoplayer.data.LocalVideoFolder
 import com.example.quadvideoplayer.data.LocalVideoStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -59,11 +62,28 @@ fun VideoPickerScreen(
 ) {
     val context = LocalContext.current
     var videos by remember { mutableStateOf<List<LocalVideo>?>(null) }
+    // SMCPKG_SUPPORT>>>Cursor006
+    // Flat all-videos grid replaced by folder-first navigation.
+    var selectedFolder by remember { mutableStateOf<LocalVideoFolder?>(null) }
+    // SMCPKG_SUPPORT<<<Cursor006
 
     LaunchedEffect(Unit) {
         videos = withContext(Dispatchers.IO) {
             LocalVideoStore.queryAll(context)
         }
+    }
+
+    val loaded = videos
+    val folders = remember(loaded) {
+        loaded?.let { LocalVideoStore.groupByFolder(it) }.orEmpty()
+    }
+    val folderVideos = remember(loaded, selectedFolder) {
+        val folder = selectedFolder ?: return@remember emptyList()
+        loaded.orEmpty().filter { it.bucketId == folder.bucketId }
+    }
+
+    BackHandler(enabled = selectedFolder != null) {
+        selectedFolder = null
     }
 
     Surface(
@@ -73,13 +93,27 @@ fun VideoPickerScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.picker_title)) },
+                    title = {
+                        Text(
+                            text = selectedFolder?.displayName
+                                ?: stringResource(R.string.picker_folders_title),
+                        )
+                    },
                     navigationIcon = {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.picker_close),
-                            )
+                        if (selectedFolder == null) {
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.picker_close),
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { selectedFolder = null }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.picker_back),
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -88,7 +122,6 @@ fun VideoPickerScreen(
                 )
             },
         ) { innerPadding ->
-            val loaded = videos
             when {
                 loaded == null -> {
                     Box(
@@ -116,6 +149,25 @@ fun VideoPickerScreen(
                     }
                 }
 
+                selectedFolder == null -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 160.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        items(folders, key = { it.bucketId }) { folder ->
+                            FolderPickerItem(
+                                folder = folder,
+                                onClick = { selectedFolder = folder },
+                            )
+                        }
+                    }
+                }
+
                 else -> {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 160.dp),
@@ -126,7 +178,7 @@ fun VideoPickerScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(loaded, key = { it.id }) { video ->
+                        items(folderVideos, key = { it.id }) { video ->
                             VideoPickerItem(
                                 video = video,
                                 onClick = { onVideoSelected(video.uri) },
@@ -140,31 +192,48 @@ fun VideoPickerScreen(
 }
 
 @Composable
+private fun FolderPickerItem(
+    folder: LocalVideoFolder,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
+        VideoThumb(
+            uri = folder.coverUri,
+            contentDescription = folder.displayName,
+        )
+        Text(
+            text = folder.displayName,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+        Text(
+            text = stringResource(R.string.picker_folder_count, folder.videoCount),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
 private fun VideoPickerItem(
     video: LocalVideo,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
     ) {
         Box {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(video.uri)
-                    .decoderFactory(VideoFrameDecoder.Factory())
-                    .videoFrameMillis(0)
-                    .crossfade(true)
-                    .build(),
+            VideoThumb(
+                uri = video.uri,
                 contentDescription = video.displayName,
-                placeholder = ColorPainter(Color(0xFF2A2A2A)),
-                error = ColorPainter(Color(0xFF2A2A2A)),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f),
             )
             Surface(
                 color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
@@ -188,4 +257,27 @@ private fun VideoPickerItem(
             modifier = Modifier.padding(top = 6.dp),
         )
     }
+}
+
+@Composable
+private fun VideoThumb(
+    uri: Uri?,
+    contentDescription: String,
+) {
+    val context = LocalContext.current
+    AsyncImage(
+        model = ImageRequest.Builder(context)
+            .data(uri)
+            .decoderFactory(VideoFrameDecoder.Factory())
+            .videoFrameMillis(0)
+            .crossfade(true)
+            .build(),
+        contentDescription = contentDescription,
+        placeholder = ColorPainter(Color(0xFF2A2A2A)),
+        error = ColorPainter(Color(0xFF2A2A2A)),
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f),
+    )
 }
