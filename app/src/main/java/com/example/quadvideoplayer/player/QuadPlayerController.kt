@@ -88,12 +88,15 @@ class QuadPlayerController(
     private var released: Boolean = false
 
     // SMCPKG_SUPPORT>>>Cursor014
-    private val swapMutex = Mutex()
-    private val boundViews = arrayOfNulls<PlayerView>(playerCount)
-
-    @Volatile
-    private var swapping: Boolean = false
+    // private val swapMutex = Mutex()
+    // @Volatile
+    // private var swapping: Boolean = false
     // SMCPKG_SUPPORT<<<Cursor014
+    // SMCPKG_SUPPORT>>>Cursor016
+    // One mutex per player so preparing cell N never blocks cell 0's renderer.
+    private val swapMutexes = Array(playerCount) { Mutex() }
+    private val boundViews = arrayOfNulls<PlayerView>(playerCount)
+    // SMCPKG_SUPPORT<<<Cursor016
 
     // SMCPKG_SUPPORT>>>Cursor004
     // fun setUnmuted(index: Int) {
@@ -144,7 +147,9 @@ class QuadPlayerController(
     fun attachPlayerView(index: Int, view: PlayerView) {
         if (index !in players.indices) return
         boundViews[index] = view
-        if (swapping) return
+        // SMCPKG_SUPPORT>>>Cursor016
+        // if (swapping) return
+        // SMCPKG_SUPPORT<<<Cursor016
         runCatching { view.player = players[index] }
             .onFailure { error -> Log.w(TAG, "attach PlayerView[$index] failed", error) }
     }
@@ -187,9 +192,11 @@ class QuadPlayerController(
     }
     // SMCPKG_SUPPORT<<<Cursor015
 
-    suspend fun awaitSwapIdle() {
-        swapMutex.withLock { }
-    }
+    // SMCPKG_SUPPORT>>>Cursor016
+    // suspend fun awaitSwapIdle() {
+    //     swapMutex.withLock { }
+    // }
+    // SMCPKG_SUPPORT<<<Cursor016
 
     // SMCPKG_SUPPORT>>>Cursor013
     // fun setVideo(index: Int, uri: Uri?, playWhenReady: Boolean) {
@@ -212,74 +219,56 @@ class QuadPlayerController(
      * Stop/clear the target player and detach its TextureView **before** prepare.
      * One swap at a time so FFmpeg JNI teardown cannot race a new surface attach.
      */
+    // SMCPKG_SUPPORT>>>Cursor016
+    /**
+     * Affects only [index]. Empty [uri] is ignored so a loop over slots
+     * cannot stop a playing sibling. Mutex is per-player.
+     */
     suspend fun setVideo(index: Int, uri: Uri?, playWhenReady: Boolean) {
         if (released || index !in players.indices) return
-        swapMutex.withLock {
+        // Never stop/clear a cell because its URI slot is still empty.
+        if (uri == null) return
+        swapMutexes[index].withLock {
             if (released) return
-            swapping = true
             val player = players[index]
-            // SMCPKG_SUPPORT>>>Cursor015
-            // val resumeOthers = players.mapIndexed { i, other ->
-            //     i != index && (other.playWhenReady || other.isPlaying)
-            // }
-            // Do not pause siblings. resumeOthers was sampled after picker pauseAll()
-            // so it was always false and left every cell stuck paused.
-            try {
-                if (uri == null &&
-                    player.mediaItemCount == 0 &&
-                    player.playbackState == Player.STATE_IDLE
-                ) {
-                    detachSurface(index)
-                    return@withLock
-                }
-                val existing = player.currentMediaItem?.localConfiguration?.uri
-                val alreadyReady = uri != null &&
-                    existing?.toString() == uri.toString() &&
-                    player.playbackState != Player.STATE_IDLE &&
-                    player.playerError == null
-                if (alreadyReady) {
-                    player.playWhenReady = playWhenReady
-                    if (playWhenReady) {
-                        runCatching { player.play() }
-                    }
-                    reattachSurface(index)
-                    return@withLock
-                }
-                // players.forEachIndexed { i, other -> if (i != index) other.pause() }
-                detachSurface(index)
-                runCatching {
-                    player.playWhenReady = false
-                    player.stop()
-                    player.clearMediaItems()
-                }.onFailure { error ->
-                    Log.w(TAG, "stop/clear player[$index] failed", error)
-                }
-                yield()
-                delay(SWAP_TEARDOWN_MS)
-                if (uri == null) {
-                    return@withLock
-                }
-                runCatching {
-                    player.setMediaSource(createMediaSource(uri))
-                    player.prepare()
-                }.onFailure { error ->
-                    Log.w(TAG, "prepare player[$index] failed", error)
-                }
+            val existing = player.currentMediaItem?.localConfiguration?.uri
+            val alreadyReady = existing?.toString() == uri.toString() &&
+                player.playbackState != Player.STATE_IDLE &&
+                player.playerError == null
+            if (alreadyReady) {
                 player.playWhenReady = playWhenReady
-                player.volume = 1f
-                player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
-                reattachSurface(index)
                 if (playWhenReady) {
                     runCatching { player.play() }
                 }
-            } finally {
-                // players.forEachIndexed { i, other -> if (resumeOthers[i]) other.play() }
-                swapping = false
-                reattachAllBoundViews()
+                return@withLock
             }
-            // SMCPKG_SUPPORT<<<Cursor015
+            val view = boundViews[index]
+            runCatching { view?.player = null }
+            runCatching {
+                player.stop()
+                player.clearMediaItems()
+            }.onFailure { error ->
+                Log.w(TAG, "stop/clear player[$index] failed", error)
+            }
+            yield()
+            delay(SWAP_TEARDOWN_MS)
+            runCatching {
+                player.setMediaSource(createMediaSource(uri))
+                player.prepare()
+                player.volume = 1f
+                player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
+            }.onFailure { error ->
+                Log.w(TAG, "prepare player[$index] failed", error)
+            }
+            player.playWhenReady = playWhenReady
+            val rebound = boundViews[index] ?: view
+            runCatching { rebound?.player = player }
+            if (playWhenReady) {
+                runCatching { player.play() }
+            }
         }
     }
+    // SMCPKG_SUPPORT<<<Cursor016
 
     private fun detachSurface(index: Int) {
         if (index !in players.indices) return
