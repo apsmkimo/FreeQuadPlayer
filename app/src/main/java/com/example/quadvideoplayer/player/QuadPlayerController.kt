@@ -115,6 +115,9 @@ class QuadPlayerController(
     @OptIn(UnstableApi::class)
     fun setVideo(index: Int, uri: Uri?, playWhenReady: Boolean) {
         if (released) return
+        // SMCPKG_SUPPORT>>>Cursor013
+        if (index !in players.indices) return
+        // SMCPKG_SUPPORT<<<Cursor013
         val player = players[index]
         if (uri == null) {
             player.stop()

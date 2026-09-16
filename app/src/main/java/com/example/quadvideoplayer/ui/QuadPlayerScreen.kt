@@ -26,15 +26,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DashboardCustomize
@@ -87,11 +86,16 @@ fun QuadPlayerScreen(
     // }
     // var isGlobalPlaying by rememberSaveable { mutableStateOf(false) }
     // SMCPKG_SUPPORT<<<Cursor004
-    var pickingIndex by remember { mutableIntStateOf(0) }
+    var pickingIndex by rememberSaveable { mutableIntStateOf(0) }
     var hasPermission by remember { mutableStateOf(VideoPermissions.hasReadAccess(context)) }
     var showPicker by remember { mutableStateOf(false) }
     var pendingPicker by remember { mutableStateOf(false) }
     val playingSnapshot = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
+    // SMCPKG_SUPPORT>>>Cursor013
+    var pendingPick by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    val pickerResumeFlags = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
+    var pausedForPicker by remember { mutableStateOf(false) }
+    // SMCPKG_SUPPORT<<<Cursor013
 
     DisposableEffect(controller) {
         onDispose { controller.releaseAll() }
@@ -126,7 +130,11 @@ fun QuadPlayerScreen(
     // SMCPKG_SUPPORT<<<Cursor004
 
     videoUriStrings.forEachIndexed { index, uriString ->
-        LaunchedEffect(uriString) {
+        // SMCPKG_SUPPORT>>>Cursor013
+        // LaunchedEffect(uriString) {
+        LaunchedEffect(index, uriString) {
+            if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return@LaunchedEffect
+            // SMCPKG_SUPPORT<<<Cursor013
             controller.setVideo(
                 index = index,
                 uri = uriString.takeIf { it.isNotEmpty() }?.let(Uri::parse),
@@ -134,6 +142,35 @@ fun QuadPlayerScreen(
             )
         }
     }
+
+    // SMCPKG_SUPPORT>>>Cursor013
+    LaunchedEffect(showPicker) {
+        if (showPicker) {
+            val snapshot = controller.snapshotPlaying()
+            snapshot.forEachIndexed { index, playing ->
+                if (index < pickerResumeFlags.size) {
+                    pickerResumeFlags[index] = playing
+                }
+            }
+            controller.pauseAll()
+            pausedForPicker = true
+        } else if (pausedForPicker) {
+            controller.resumePlaying(pickerResumeFlags.toList())
+            pausedForPicker = false
+        }
+    }
+
+    LaunchedEffect(showPicker, pendingPick) {
+        val pick = pendingPick ?: return@LaunchedEffect
+        if (showPicker) return@LaunchedEffect
+        pendingPick = null
+        if (pick.first in videoUriStrings.indices) {
+            videoUriStrings = videoUriStrings.toMutableList().also { list ->
+                list[pick.first] = pick.second
+            }
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor013
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -177,14 +214,26 @@ fun QuadPlayerScreen(
         } catch (_: SecurityException) {
             // MediaStore URIs rely on READ_MEDIA_VIDEO / READ_EXTERNAL_STORAGE.
         }
-        videoUriStrings = videoUriStrings.toMutableList().also { list ->
-            list[pickingIndex] = uri.toString()
+        // SMCPKG_SUPPORT>>>Cursor013
+        // videoUriStrings = videoUriStrings.toMutableList().also { list ->
+        //     list[pickingIndex] = uri.toString()
+        // }
+        // showPicker = false
+        // pendingPicker = false
+        val index = pickingIndex
+        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) {
+            showPicker = false
+            pendingPicker = false
+            return
         }
+        pendingPick = index to uri.toString()
         showPicker = false
         pendingPicker = false
+        // SMCPKG_SUPPORT<<<Cursor013
     }
 
     fun pickVideo(index: Int) {
+        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
         pickingIndex = index
         if (VideoPermissions.hasReadAccess(context)) {
             hasPermission = true
@@ -213,37 +262,34 @@ fun QuadPlayerScreen(
             .fillMaxSize()
             .background(HairlineColor),
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            // SMCPKG_SUPPORT>>>Cursor012
-            // val cellHeight = (maxHeight - Hairline) / QuadPlayerController.GRID_COLUMNS
-            // columns = GridCells.Fixed(QuadPlayerController.GRID_COLUMNS)
-            val columns = layout.columns
-            val rows = layout.rows
-            val cellHeight = (maxHeight - Hairline * (rows - 1).coerceAtLeast(0)) / rows
-            // SMCPKG_SUPPORT<<<Cursor012
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
+        // SMCPKG_SUPPORT>>>Cursor013
+        // BoxWithConstraints + LazyVerticalGrid used computed cellHeight. In 1x4
+        // the 4th row could land on a clipped/zero lazy slot; PlayerView's
+        // SurfaceView then died the process when the 4th video attached.
+        // BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        //     val columns = layout.columns
+        //     val rows = layout.rows
+        //     val cellHeight = (maxHeight - Hairline * (rows - 1).coerceAtLeast(0)) / rows
+        //     LazyVerticalGrid(...) { items(PLAYER_COUNT) { ... height(cellHeight) } }
+        // }
+        PlayerPaneGrid(
+            layout = layout,
+            modifier = Modifier.fillMaxSize(),
+        ) { index ->
+            val uri = videoUriStrings.getOrNull(index)
+                ?.takeIf { it.isNotEmpty() }
+                ?.let(Uri::parse)
+            val player = controller.players.getOrNull(index) ?: return@PlayerPaneGrid
+            VideoCell(
+                index = index,
+                player = player,
+                videoUri = uri,
+                onPickVideo = { pickVideo(index) },
+                attachSurface = !showPicker,
                 modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = false,
-                horizontalArrangement = Arrangement.spacedBy(Hairline),
-                verticalArrangement = Arrangement.spacedBy(Hairline),
-            ) {
-                items(QuadPlayerController.PLAYER_COUNT) { index ->
-                    val uri = videoUriStrings[index]
-                        .takeIf { it.isNotEmpty() }
-                        ?.let(Uri::parse)
-                    VideoCell(
-                        index = index,
-                        player = controller.players[index],
-                        videoUri = uri,
-                        onPickVideo = { pickVideo(index) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(cellHeight),
-                    )
-                }
-            }
+            )
         }
+        // SMCPKG_SUPPORT<<<Cursor013
 
         if (!showPicker) {
             // SMCPKG_SUPPORT>>>Cursor012
@@ -288,3 +334,57 @@ fun QuadPlayerScreen(
         }
     }
 }
+
+// SMCPKG_SUPPORT>>>Cursor013
+@Composable
+private fun PlayerPaneGrid(
+    layout: PlayerLayout,
+    modifier: Modifier = Modifier,
+    cell: @Composable (index: Int) -> Unit,
+) {
+    when (layout) {
+        PlayerLayout.VERTICAL_1X4 -> {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    ) {
+                        cell(index)
+                    }
+                }
+            }
+        }
+
+        PlayerLayout.LANDSCAPE_2X2 -> {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(2) { row ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(Hairline),
+                    ) {
+                        repeat(2) { col ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                            ) {
+                                cell(row * 2 + col)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+// SMCPKG_SUPPORT<<<Cursor013
