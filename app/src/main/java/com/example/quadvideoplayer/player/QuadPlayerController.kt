@@ -118,11 +118,14 @@ class QuadPlayerController(
 
     fun resumePlaying(playingFlags: List<Boolean>) {
         if (released) return
-        players.forEachIndexed { index, player ->
-            if (playingFlags.getOrElse(index) { false }) {
-                player.play()
-            }
-        }
+        // SMCPKG_SUPPORT>>>Cursor015
+        // players.forEachIndexed { index, player ->
+        //     if (playingFlags.getOrElse(index) { false }) {
+        //         player.play()
+        //     }
+        // }
+        restorePlayback(playingFlags)
+        // SMCPKG_SUPPORT<<<Cursor015
     }
 
     fun snapshotPlaying(): List<Boolean> {
@@ -131,21 +134,58 @@ class QuadPlayerController(
     }
 
     // SMCPKG_SUPPORT>>>Cursor014
-    fun bindPlayerView(index: Int, view: PlayerView?) {
+    // SMCPKG_SUPPORT>>>Cursor015
+    // fun bindPlayerView(index: Int, view: PlayerView?) {
+    //     boundViews[index] = view
+    //     if (view == null) { detachSurface(index); return }
+    //     if (swapping) return
+    //     view.player = player
+    // }
+    fun attachPlayerView(index: Int, view: PlayerView) {
         if (index !in players.indices) return
         boundViews[index] = view
-        val player = players[index]
-        if (view == null) {
-            detachSurface(index)
-            return
-        }
         if (swapping) return
-        try {
-            view.player = player
-        } catch (error: RuntimeException) {
-            Log.w(TAG, "bind PlayerView[$index] failed", error)
+        runCatching { view.player = players[index] }
+            .onFailure { error -> Log.w(TAG, "attach PlayerView[$index] failed", error) }
+    }
+
+    fun detachPlayerView(index: Int, view: PlayerView) {
+        if (index !in players.indices) return
+        // Ignore stale onRelease after a replacement view already bound (1x4 ↔ 2x2).
+        if (boundViews[index] !== view) return
+        boundViews[index] = null
+        runCatching { view.player = null }
+            .onFailure { error -> Log.w(TAG, "detach PlayerView[$index] failed", error) }
+    }
+
+    fun reattachAllBoundViews() {
+        if (released) return
+        boundViews.forEachIndexed { index, view ->
+            if (view != null) {
+                runCatching { view.player = players[index] }
+            }
         }
     }
+
+    /**
+     * Re-bind every PlayerView that still exists and play cells that have media
+     * and are marked in [playingFlags]. A null flag list means "play every cell
+     * that has media" (used after layout switch).
+     */
+    fun restorePlayback(playingFlags: List<Boolean>?) {
+        if (released) return
+        reattachAllBoundViews()
+        players.forEachIndexed { index, player ->
+            if (player.mediaItemCount == 0) return@forEachIndexed
+            val shouldPlay = playingFlags?.getOrElse(index) { false } ?: true
+            if (shouldPlay) {
+                player.playWhenReady = true
+                runCatching { player.play() }
+                    .onFailure { error -> Log.w(TAG, "restore play[$index] failed", error) }
+            }
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor015
 
     suspend fun awaitSwapIdle() {
         swapMutex.withLock { }
@@ -178,9 +218,12 @@ class QuadPlayerController(
             if (released) return
             swapping = true
             val player = players[index]
-            val resumeOthers = players.mapIndexed { i, other ->
-                i != index && (other.playWhenReady || other.isPlaying)
-            }
+            // SMCPKG_SUPPORT>>>Cursor015
+            // val resumeOthers = players.mapIndexed { i, other ->
+            //     i != index && (other.playWhenReady || other.isPlaying)
+            // }
+            // Do not pause siblings. resumeOthers was sampled after picker pauseAll()
+            // so it was always false and left every cell stuck paused.
             try {
                 if (uri == null &&
                     player.mediaItemCount == 0 &&
@@ -191,19 +234,18 @@ class QuadPlayerController(
                 }
                 val existing = player.currentMediaItem?.localConfiguration?.uri
                 val alreadyReady = uri != null &&
-                    existing == uri &&
+                    existing?.toString() == uri.toString() &&
                     player.playbackState != Player.STATE_IDLE &&
                     player.playerError == null
                 if (alreadyReady) {
                     player.playWhenReady = playWhenReady
+                    if (playWhenReady) {
+                        runCatching { player.play() }
+                    }
                     reattachSurface(index)
                     return@withLock
                 }
-                players.forEachIndexed { i, other ->
-                    if (i != index) {
-                        runCatching { other.pause() }
-                    }
-                }
+                // players.forEachIndexed { i, other -> if (i != index) other.pause() }
                 detachSurface(index)
                 runCatching {
                     player.playWhenReady = false
@@ -227,14 +269,15 @@ class QuadPlayerController(
                 player.volume = 1f
                 player.setAudioAttributes(concurrentMediaAttributes(), /* handleAudioFocus = */ false)
                 reattachSurface(index)
-            } finally {
-                players.forEachIndexed { i, other ->
-                    if (resumeOthers.getOrElse(i) { false }) {
-                        runCatching { other.play() }
-                    }
+                if (playWhenReady) {
+                    runCatching { player.play() }
                 }
+            } finally {
+                // players.forEachIndexed { i, other -> if (resumeOthers[i]) other.play() }
                 swapping = false
+                reattachAllBoundViews()
             }
+            // SMCPKG_SUPPORT<<<Cursor015
         }
     }
 

@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -105,7 +106,20 @@ fun QuadPlayerScreen(
         onDispose { controller.releaseAll() }
     }
 
+    // SMCPKG_SUPPORT>>>Cursor015
+    LaunchedEffect(layout) {
+        delay(32)
+        controller.reattachAllBoundViews()
+        controller.restorePlayback(
+            List(QuadPlayerController.PLAYER_COUNT) { index ->
+                controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+            },
+        )
+    }
+    // SMCPKG_SUPPORT<<<Cursor015
+
     LifecycleStartEffect(controller) {
+        controller.reattachAllBoundViews()
         controller.resumePlaying(playingSnapshot.toList())
         onStopOrDispose {
             val snapshot = controller.snapshotPlaying()
@@ -166,19 +180,26 @@ fun QuadPlayerScreen(
             val pick = pendingPick
             pendingPick = null
             if (pick != null && pick.first in videoUriStrings.indices) {
+                if (pick.first < pickerResumeFlags.size) {
+                    pickerResumeFlags[pick.first] = true
+                }
                 videoUriStrings = videoUriStrings.toMutableList().also { list ->
                     list[pick.first] = pick.second
                 }
                 controller.setVideo(
                     index = pick.first,
                     uri = pick.second.takeIf { it.isNotEmpty() }?.let(Uri::parse),
-                    playWhenReady = pick.second.isNotEmpty(),
+                    playWhenReady = true,
                 )
             }
             controller.awaitSwapIdle()
             surfacesReady = true
+            delay(32)
             // SMCPKG_SUPPORT<<<Cursor014
-            controller.resumePlaying(pickerResumeFlags.toList())
+            // SMCPKG_SUPPORT>>>Cursor015
+            // controller.resumePlaying(pickerResumeFlags.toList())
+            controller.restorePlayback(pickerResumeFlags.toList())
+            // SMCPKG_SUPPORT<<<Cursor015
             pausedForPicker = false
         }
     }
@@ -302,7 +323,8 @@ fun QuadPlayerScreen(
                 videoUri = uri,
                 onPickVideo = { pickVideo(index) },
                 attachSurface = !showPicker && surfacesReady,
-                onBindPlayerView = { view -> controller.bindPlayerView(index, view) },
+                onAttachPlayerView = { view -> controller.attachPlayerView(index, view) },
+                onDetachPlayerView = { view -> controller.detachPlayerView(index, view) },
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -371,7 +393,7 @@ private fun PlayerPaneGrid(
                             .fillMaxWidth()
                             .weight(1f),
                     ) {
-                        cell(index)
+                        key(index) { cell(index) }
                     }
                 }
             }
@@ -395,7 +417,7 @@ private fun PlayerPaneGrid(
                                     .weight(1f)
                                     .fillMaxHeight(),
                             ) {
-                                cell(row * 2 + col)
+                                key(row * 2 + col) { cell(row * 2 + col) }
                             }
                         }
                     }
