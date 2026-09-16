@@ -225,7 +225,8 @@ class QuadPlayerController(
                 // SMCPKG_SUPPORT>>>Cursor009
                 // .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
                 // Prefer bundled FFmpeg software decoders (Media3 decoder_ffmpeg) when
-                // the extension can handle the stream (typical AVI MP3/AC3 audio).
+                // the extension can handle the stream (old AVI video + MP3/AC3 audio).
+                // H.264/HEVC are not advertised so modern MP4 stays on MediaCodec.
                 // Hardware MediaCodec stays registered as fallback via decoder fallback.
                 .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
                 // SMCPKG_SUPPORT<<<Cursor009

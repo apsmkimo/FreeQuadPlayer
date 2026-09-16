@@ -50,8 +50,9 @@ captures/
 obj/
 
 # SMCPKG_SUPPORT>>>Cursor009
-# FFmpeg source / intermediate native rebuild (prebuilt jniLibs are committed)
+# FFmpeg / libyuv source (prebuilt jniLibs are committed)
 decoder-ffmpeg/src/main/jni/ffmpeg/
+decoder-ffmpeg/src/main/jni/libyuv/
 decoder-ffmpeg/.cxx-rebuild/
 # SMCPKG_SUPPORT<<<Cursor009
 

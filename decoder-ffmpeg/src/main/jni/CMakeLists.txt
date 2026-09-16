@@ -26,7 +26,7 @@ project(libffmpegJNI C CXX)
 set(ffmpeg_location "${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg")
 set(ffmpeg_binaries "${ffmpeg_location}/android-libs/${ANDROID_ABI}")
 
-foreach(ffmpeg_lib avutil swresample avcodec)
+foreach(ffmpeg_lib avutil swresample avcodec swscale)
     set(ffmpeg_lib_filename lib${ffmpeg_lib}.a)
     set(ffmpeg_lib_file_path ${ffmpeg_binaries}/${ffmpeg_lib_filename})
     add_library(
@@ -39,18 +39,33 @@ foreach(ffmpeg_lib avutil swresample avcodec)
             ${ffmpeg_lib_file_path})
 endforeach()
 
+set(yuv_location "${CMAKE_CURRENT_SOURCE_DIR}/libyuv")
+set(yuv_binaries "${yuv_location}/android-libs/${ANDROID_ABI}")
+add_library(yuv STATIC IMPORTED)
+set_target_properties(
+        yuv PROPERTIES
+        IMPORTED_LOCATION
+        ${yuv_binaries}/libyuv.a)
+
 include_directories(${ffmpeg_location})
+include_directories("${yuv_location}/include")
 find_library(android_log_lib log)
 
 add_library(ffmpegJNI
             SHARED
             ffmpeg_jni.cc)
 
+set_target_properties(ffmpegJNI PROPERTIES
+                      CXX_VISIBILITY_PRESET hidden
+                      VISIBILITY_INLINES_HIDDEN ON)
+
 target_link_libraries(ffmpegJNI
                       PRIVATE android
+                      PRIVATE swscale
                       PRIVATE swresample
                       PRIVATE avcodec
                       PRIVATE avutil
+                      PRIVATE yuv
                       PRIVATE ${android_log_lib})
 
 # Additional flags needed for "arm64-v8a" from NDK 23.1.7779620 and above.
@@ -59,3 +74,5 @@ if(ANDROID_ABI STREQUAL "arm64-v8a")
     target_link_options(ffmpegJNI PRIVATE "-Wl,-Bsymbolic")
 endif()
 
+target_link_options(ffmpegJNI
+                    PRIVATE "-Wl,-z,max-page-size=16384")

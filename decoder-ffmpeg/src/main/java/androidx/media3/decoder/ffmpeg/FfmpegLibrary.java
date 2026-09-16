@@ -150,10 +150,32 @@ public final class FfmpegLibrary {
         return "pcm_mulaw";
       case MimeTypes.AUDIO_ALAW:
         return "pcm_alaw";
-      case MimeTypes.VIDEO_H264:
-        return "h264";
-      case MimeTypes.VIDEO_H265:
-        return "hevc";
+      // SMCPKG_SUPPORT>>>Cursor010
+      // H.264 / HEVC stay on hardware MediaCodec under PREFER so 4-way modern
+      // MP4 does not burn CPU. Old AVI codecs take the FFmpeg video path.
+      // case MimeTypes.VIDEO_H264:
+      //   return "h264";
+      // case MimeTypes.VIDEO_H265:
+      //   return "hevc";
+      case MimeTypes.VIDEO_MP4V:
+      case MimeTypes.VIDEO_DIVX:
+        return "mpeg4";
+      case MimeTypes.VIDEO_MP42:
+        return "msmpeg4v2";
+      case MimeTypes.VIDEO_MP43:
+        return "msmpeg4v3";
+      case MimeTypes.VIDEO_MPEG:
+      case MimeTypes.VIDEO_MPEG2:
+        return "mpeg2video";
+      case MimeTypes.VIDEO_MJPEG:
+        return "mjpeg";
+      case MimeTypes.VIDEO_H263:
+        return "h263";
+      case MimeTypes.VIDEO_FLV:
+        return "flv";
+      case MimeTypes.VIDEO_VC1:
+        return "vc1";
+      // SMCPKG_SUPPORT<<<Cursor010
       default:
         return null;
     }
@@ -164,4 +186,8 @@ public final class FfmpegLibrary {
   private static native int ffmpegGetInputBufferPaddingSize();
 
   private static native boolean ffmpegHasDecoder(String codecName);
+
+  // Registered by ffmpeg_jni.cc JNI_OnLoad (PR 1591). Unused: AV1 stays on MediaCodec.
+  @Nullable
+  private static native String ffmpegGetAv1DecoderName();
 }
