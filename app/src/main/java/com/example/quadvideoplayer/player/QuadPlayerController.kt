@@ -1,3 +1,21 @@
+/*
+ * TetraView / FreeQuadPlayer
+ * Copyright (C) 2026 apsmkimo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.example.quadvideoplayer.player
 
 import android.content.Context
@@ -15,6 +33,7 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.decoder.ffmpeg.FfmpegLibrary
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.avi.AviExtractor
@@ -200,8 +219,16 @@ class QuadPlayerController(
         @OptIn(UnstableApi::class)
         fun createHardwareFirstPlayer(context: Context): ExoPlayer {
             val appContext = context.applicationContext
+            // Load libffmpegJNI.so so DefaultRenderersFactory can instantiate FfmpegAudioRenderer.
+            FfmpegLibrary.isAvailable()
             val renderersFactory = DefaultRenderersFactory(appContext)
-                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+                // SMCPKG_SUPPORT>>>Cursor009
+                // .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+                // Prefer bundled FFmpeg software decoders (Media3 decoder_ffmpeg) when
+                // the extension can handle the stream (typical AVI MP3/AC3 audio).
+                // Hardware MediaCodec stays registered as fallback via decoder fallback.
+                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+                // SMCPKG_SUPPORT<<<Cursor009
                 .setEnableDecoderFallback(true)
                 .setEnableAudioTrackPlaybackParams(true)
             val loadControl = DefaultLoadControl.Builder()

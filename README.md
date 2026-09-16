@@ -12,6 +12,7 @@ TetraView is a four-way local video player for Android. It puts four independent
 - **Simultaneous 4-way audio mixing** — all four ExoPlayers can output audio at once (no exclusive mute)
 - **Per-cell overlay controls** — tap a cell to show or hide play/pause, seek, time labels, and volume
 - **Seek + volume gestures** — total duration sits before the slider and elapsed time after it; tap the speaker to mute/unmute, swipe vertically on the icon to change that cell’s volume
+- **FFmpeg-prefer decode** — all four players use Media3 `EXTENSION_RENDERER_MODE_PREFER` so streams the bundled FFmpeg software decoders can handle (typical old-AVI MP3/AC3 audio) take that path first; hardware MediaCodec remains the fallback
 
 ## Tech Stack
 
@@ -20,11 +21,14 @@ TetraView is a four-way local video player for Android. It puts four independent
 | Language | Kotlin |
 | UI | Jetpack Compose (Material 3) |
 | Playback | Jetpack Media3 ExoPlayer |
+| Decode | Media3 FFmpeg Extension (FFmpeg Software Decoding) |
 | Thumbnails | Coil (`coil-compose`, `coil-video`) |
 | CI | GitHub Actions (`./gradlew assembleDebug`, artifact `app-debug`) |
 
 Package ID: `com.example.quadvideoplayer`  
-minSdk 24 · compileSdk 36 · targetSdk 35
+minSdk 24 · compileSdk 36 · targetSdk 35 · versionName 1.0.0
+
+Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module plus prebuilt `libffmpegJNI.so` (FFmpeg 6.0). See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md).
 
 ## How to download and test the compiled APK
 
@@ -49,6 +53,8 @@ You can also build locally:
 
 Output: `app/build/outputs/apk/debug/app-debug.apk`
 
+GitHub Actions does not need the Android NDK: FFmpeg JNI libraries are prebuilt and committed. Rebuilding them requires NDK r26b and FFmpeg 6.0 (`./decoder-ffmpeg/rebuild-native.sh`).
+
 ## License
 
-MIT. See [LICENSE](LICENSE).
+TetraView / FreeQuadPlayer is licensed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE).
