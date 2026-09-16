@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -123,13 +121,22 @@ fun CellPlaybackBar(
             ),
         )
 
-        TextButton(onClick = onPickVideo) {
-            Text(
-                text = stringResource(R.string.change_video),
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.White,
+        // SMCPKG_SUPPORT>>>Cursor005
+        // TextButton(onClick = onPickVideo) {
+        //     Text(
+        //         text = stringResource(R.string.change_video),
+        //         style = MaterialTheme.typography.labelLarge,
+        //         color = Color.White,
+        //     )
+        // }
+        IconButton(onClick = onPickVideo) {
+            Icon(
+                imageVector = Icons.Outlined.FolderOpen,
+                contentDescription = stringResource(R.string.pick_video),
+                tint = Color.White,
             )
         }
+        // SMCPKG_SUPPORT<<<Cursor005
     }
 }
 

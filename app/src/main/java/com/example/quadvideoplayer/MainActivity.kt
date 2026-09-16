@@ -1,5 +1,6 @@
 package com.example.quadvideoplayer
 
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -16,6 +17,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // SMCPKG_SUPPORT>>>Cursor005
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        // SMCPKG_SUPPORT<<<Cursor005
         // SMCPKG_SUPPORT>>>Cursor004
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes = window.attributes.apply {

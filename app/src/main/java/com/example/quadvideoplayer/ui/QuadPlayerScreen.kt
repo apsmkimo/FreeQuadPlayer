@@ -53,6 +53,8 @@ fun QuadPlayerScreen() {
     // SMCPKG_SUPPORT<<<Cursor004
     var pickingIndex by remember { mutableIntStateOf(0) }
     var hasPermission by remember { mutableStateOf(VideoPermissions.hasReadAccess(context)) }
+    var showPicker by remember { mutableStateOf(false) }
+    var pendingPicker by remember { mutableStateOf(false) }
     val playingSnapshot = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
 
     DisposableEffect(controller) {
@@ -101,29 +103,62 @@ fun QuadPlayerScreen() {
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
         hasPermission = granted || VideoPermissions.hasReadAccess(context)
+        // SMCPKG_SUPPORT>>>Cursor005
+        if (hasPermission && pendingPicker) {
+            showPicker = true
+            pendingPicker = false
+        }
+        // SMCPKG_SUPPORT<<<Cursor005
     }
 
-    val documentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
+    // SMCPKG_SUPPORT>>>Cursor005
+    // val documentLauncher = rememberLauncherForActivityResult(
+    //     contract = ActivityResultContracts.OpenDocument(),
+    // ) { uri ->
+    //     if (uri == null) return@rememberLauncherForActivityResult
+    //     try {
+    //         context.contentResolver.takePersistableUriPermission(
+    //             uri,
+    //             Intent.FLAG_GRANT_READ_URI_PERMISSION,
+    //         )
+    //     } catch (_: SecurityException) {
+    //     }
+    //     videoUriStrings = videoUriStrings.toMutableList().also { list ->
+    //         list[pickingIndex] = uri.toString()
+    //     }
+    // }
+    //
+    // fun pickVideo(index: Int) {
+    //     pickingIndex = index
+    //     documentLauncher.launch(arrayOf("video/*"))
+    // }
+    fun applyPickedUri(uri: Uri) {
         try {
             context.contentResolver.takePersistableUriPermission(
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION,
             )
         } catch (_: SecurityException) {
-            // SAF may still grant session access even if persistable permission is unavailable.
+            // MediaStore URIs rely on READ_MEDIA_VIDEO / READ_EXTERNAL_STORAGE.
         }
         videoUriStrings = videoUriStrings.toMutableList().also { list ->
             list[pickingIndex] = uri.toString()
         }
+        showPicker = false
+        pendingPicker = false
     }
 
     fun pickVideo(index: Int) {
         pickingIndex = index
-        documentLauncher.launch(arrayOf("video/*"))
+        if (VideoPermissions.hasReadAccess(context)) {
+            hasPermission = true
+            showPicker = true
+        } else {
+            pendingPicker = true
+            permissionLauncher.launch(VideoPermissions.requiredPermission())
+        }
     }
+    // SMCPKG_SUPPORT<<<Cursor005
 
     fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -168,16 +203,28 @@ fun QuadPlayerScreen() {
             }
         }
 
-        PermissionBanner(
-            granted = hasPermission,
-            onGrantClick = {
-                permissionLauncher.launch(VideoPermissions.requiredPermission())
-            },
-            onSettingsClick = { openAppSettings() },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .statusBarsPadding()
-                .fillMaxWidth(),
-        )
+        if (!showPicker) {
+            PermissionBanner(
+                granted = hasPermission,
+                onGrantClick = {
+                    permissionLauncher.launch(VideoPermissions.requiredPermission())
+                },
+                onSettingsClick = { openAppSettings() },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .fillMaxWidth(),
+            )
+        }
+
+        if (showPicker) {
+            VideoPickerScreen(
+                onVideoSelected = { uri -> applyPickedUri(uri) },
+                onDismiss = {
+                    showPicker = false
+                    pendingPicker = false
+                },
+            )
+        }
     }
 }
