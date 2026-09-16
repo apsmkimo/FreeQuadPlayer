@@ -98,7 +98,9 @@ fun TetraViewApp() {
             QuadPlayerScreen(
                 layout = selected,
                 onChangeLayout = { showSelection = true },
-                onAbout = { showAbout = true },
+                // SMCPKG_SUPPORT>>>Cursor022
+                // onAbout = { showAbout = true },
+                // SMCPKG_SUPPORT<<<Cursor022
             )
             if (showSelection) {
                 LauncherSelectionScreen(

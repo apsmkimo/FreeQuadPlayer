@@ -27,6 +27,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,9 +41,13 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DashboardCustomize
-import androidx.compose.material.icons.outlined.Info
+// SMCPKG_SUPPORT>>>Cursor022
+// import androidx.compose.material.icons.outlined.Info
+// SMCPKG_SUPPORT<<<Cursor022
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+// SMCPKG_SUPPORT>>>Cursor022
+// import androidx.compose.material3.IconButton
+// SMCPKG_SUPPORT<<<Cursor022
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -85,7 +90,9 @@ fun QuadPlayerScreen(
     layout: PlayerLayout,
     onChangeLayout: () -> Unit,
     // SMCPKG_SUPPORT>>>Cursor021
-    onAbout: () -> Unit = {},
+    // SMCPKG_SUPPORT>>>Cursor022
+    // onAbout: () -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor022
     // SMCPKG_SUPPORT<<<Cursor021
 ) {
 // SMCPKG_SUPPORT<<<Cursor012
@@ -340,42 +347,28 @@ fun QuadPlayerScreen(
 
         if (!showPicker) {
             // SMCPKG_SUPPORT>>>Cursor012
-            Row(
+            // SMCPKG_SUPPORT>>>Cursor022
+            // Row(...) { About IconButton 40.dp; layout IconButton 40.dp }
+            // About stays on LauncherSelectionScreen only. Layout chip is 50% of 40.dp.
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
-                    .padding(end = 8.dp, top = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    .padding(end = 8.dp, top = 4.dp)
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x99000000))
+                    .clickable(onClick = onChangeLayout),
+                contentAlignment = Alignment.Center,
             ) {
-                // SMCPKG_SUPPORT>>>Cursor021
-                IconButton(
-                    onClick = onAbout,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x99000000)),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = stringResource(R.string.about_title),
-                        tint = Color.White,
-                    )
-                }
-                // SMCPKG_SUPPORT<<<Cursor021
-                IconButton(
-                    onClick = onChangeLayout,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color(0x99000000)),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.DashboardCustomize,
-                        contentDescription = stringResource(R.string.change_layout),
-                        tint = Color.White,
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Filled.DashboardCustomize,
+                    contentDescription = stringResource(R.string.change_layout),
+                    tint = Color.White,
+                    modifier = Modifier.size(12.dp),
+                )
             }
+            // SMCPKG_SUPPORT<<<Cursor022
             // SMCPKG_SUPPORT<<<Cursor012
             PermissionBanner(
                 granted = hasPermission,
