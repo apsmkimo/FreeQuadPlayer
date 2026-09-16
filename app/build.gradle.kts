@@ -6,7 +6,10 @@ plugins {
 
 // SMCPKG_SUPPORT>>>Cursor009
 /** Current release name. Next release: increment the third component by 1 (1.0.0 → 1.0.1). */
-val APP_VERSION_NAME = "1.0.0"
+// SMCPKG_SUPPORT>>>Cursor011
+// val APP_VERSION_NAME = "1.0.0"
+val APP_VERSION_NAME = "1.0.1"
+// SMCPKG_SUPPORT<<<Cursor011
 
 /**
  * Maps versionName to versionCode: 1.0.0 → 100, 1.0.1 → 101, 1.0.2 → 102.

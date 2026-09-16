@@ -187,12 +187,26 @@ class QuadPlayerController(
         // SMCPKG_SUPPORT<<<Cursor004
         const val GRID_COLUMNS = 2
 
+        // SMCPKG_SUPPORT>>>Cursor011
         // Larger min/max than the 2.5s/5s start thresholds so AVI can preload,
         // without exceeding 50s cached per player (4-way memory budget).
+        // const val MIN_BUFFER_MS = 15_000
+        // const val MAX_BUFFER_MS = 50_000
+        // const val BUFFER_FOR_PLAYBACK_MS = 2_500
+        // const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 5_000
+        // LoadControl invariants: min >= playback buffers, max >= min.
         const val MIN_BUFFER_MS = 15_000
         const val MAX_BUFFER_MS = 50_000
-        const val BUFFER_FOR_PLAYBACK_MS = 2_500
-        const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 5_000
+        const val BUFFER_FOR_PLAYBACK_MS = 5_000
+        const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 7_000
+        // Longer than the 5s default so a corrupt AVI video index can "join"
+        // without blocking the audio MediaClock (DefaultMediaClock).
+        const val ALLOWED_VIDEO_JOINING_TIME_MS = 15_000L
+        // More aggressive than MediaCodecVideoRenderer's 15_000 µs default:
+        // drop decoder inputs predicted to render late so video skips silently
+        // instead of stalling the audio-driven clock.
+        const val LATE_THRESHOLD_TO_DROP_DECODER_INPUT_US = 5_000L
+        // SMCPKG_SUPPORT<<<Cursor011
 
         private val AVI_MIME_TYPES = setOf(
             "video/avi",
@@ -232,6 +246,19 @@ class QuadPlayerController(
                 // SMCPKG_SUPPORT<<<Cursor009
                 .setEnableDecoderFallback(true)
                 .setEnableAudioTrackPlaybackParams(true)
+                // SMCPKG_SUPPORT>>>Cursor011
+                // Audio-driven clock: ExoPlayer DefaultMediaClock uses the audio
+                // renderer (FfmpegAudioRenderer / MediaCodecAudioRenderer) as
+                // MediaClock. Video does not own the clock; late/missing AVI
+                // frames must skip rather than freeze sync.
+                // Tunneling is left OFF — Media3 tunneling shares one AudioTrack
+                // session with MediaCodec video and breaks 4 independent
+                // Compose PlayerView surfaces.
+                .setAllowedVideoJoiningTimeMs(ALLOWED_VIDEO_JOINING_TIME_MS)
+                .experimentalSetLateThresholdToDropDecoderInputUs(
+                    LATE_THRESHOLD_TO_DROP_DECODER_INPUT_US,
+                )
+                // SMCPKG_SUPPORT<<<Cursor011
             val loadControl = DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
                     MIN_BUFFER_MS,
@@ -239,6 +266,9 @@ class QuadPlayerController(
                     BUFFER_FOR_PLAYBACK_MS,
                     BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
                 )
+                // SMCPKG_SUPPORT>>>Cursor011
+                .setPrioritizeTimeOverSizeThresholds(true)
+                // SMCPKG_SUPPORT<<<Cursor011
                 .build()
             return ExoPlayer.Builder(appContext, renderersFactory)
                 .setLoadControl(loadControl)
