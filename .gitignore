@@ -42,6 +42,10 @@ captures/
 # Keystore files
 *.jks
 *.keystore
+# SMCPKG_SUPPORT>>>Cursor012
+# Committed debug keystore so local and CI debug APKs share one signature.
+!app/debug.keystore
+# SMCPKG_SUPPORT<<<Cursor012
 
 # Google Services (uncomment if you add Firebase)
 # google-services.json

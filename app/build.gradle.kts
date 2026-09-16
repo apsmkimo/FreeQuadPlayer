@@ -8,7 +8,8 @@ plugins {
 /** Current release name. Next release: increment the third component by 1 (1.0.0 → 1.0.1). */
 // SMCPKG_SUPPORT>>>Cursor011
 // val APP_VERSION_NAME = "1.0.0"
-val APP_VERSION_NAME = "1.0.1"
+// val APP_VERSION_NAME = "1.0.1"
+val APP_VERSION_NAME = "1.0.2"
 // SMCPKG_SUPPORT<<<Cursor011
 
 /**
@@ -51,7 +52,24 @@ android {
         // SMCPKG_SUPPORT<<<Cursor009
     }
 
+    // SMCPKG_SUPPORT>>>Cursor012
+    // Debug APKs (local + GitHub Actions assembleDebug) always use the committed
+    // project keystore at app/debug.keystore so overwrite-install upgrades work.
+    // Store password / key password / alias match the standard Android debug key.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor012
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

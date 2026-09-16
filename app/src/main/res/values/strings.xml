@@ -27,4 +27,12 @@
     <string name="cell_pause">暫停</string>
     <string name="cell_mute">Mute</string>
     <string name="cell_unmute">Unmute</string>
+    <!-- SMCPKG_SUPPORT>>>Cursor012 -->
+    <string name="layout_selection_title">選擇畫面配置</string>
+    <string name="layout_vertical_title">直向模式（1x4 直向堆疊）</string>
+    <string name="layout_vertical_body">直向顯示，四個播放器由上到下堆疊，各占滿寬度，以 FIT 比例留黑邊。</string>
+    <string name="layout_landscape_title">橫向模式（2x2 格狀）</string>
+    <string name="layout_landscape_body">強制橫向，維持目前的 2x2 格狀畫面。</string>
+    <string name="change_layout">變更配置</string>
+    <!-- SMCPKG_SUPPORT<<<Cursor012 -->
 </resources>
