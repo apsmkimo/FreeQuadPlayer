@@ -3,6 +3,9 @@ name: Android CI
 on:
   push:
     branches: [main]
+  # Also build PRs so FFmpeg JNI packaging is verified before merge.
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
@@ -21,6 +24,8 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
 
+      # NDK is not required: :decoder-ffmpeg ships prebuilt libffmpegJNI.so.
+      # Rebuild natives locally with ./decoder-ffmpeg/rebuild-native.sh (NDK r26b + FFmpeg 6.0).
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
