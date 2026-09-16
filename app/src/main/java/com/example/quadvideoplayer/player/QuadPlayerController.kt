@@ -8,17 +8,26 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 
 /**
  * Holds four independent ExoPlayers. Each can play audio at the same time.
  */
+@OptIn(UnstableApi::class)
 class QuadPlayerController(
     context: Context,
     val playerCount: Int = PLAYER_COUNT,
 ) {
     val players: List<ExoPlayer> = List(playerCount) {
-        ExoPlayer.Builder(context.applicationContext).build().apply {
+        // SMCPKG_SUPPORT>>>Cursor007
+        // ExoPlayer.Builder(context.applicationContext).build().apply {
+        ExoPlayer.Builder(context.applicationContext, createSoftDecodeRenderersFactory(context))
+            .build()
+            .apply {
+        // SMCPKG_SUPPORT<<<Cursor007
             repeatMode = Player.REPEAT_MODE_ONE
             // SMCPKG_SUPPORT>>>Cursor004
             // volume = if (index == DEFAULT_UNMUTED_INDEX) 1f else 0f
@@ -100,6 +109,25 @@ class QuadPlayerController(
         // const val DEFAULT_UNMUTED_INDEX = 0
         // SMCPKG_SUPPORT<<<Cursor004
         const val GRID_COLUMNS = 2
+
+        @OptIn(UnstableApi::class)
+        fun createSoftDecodeRenderersFactory(context: Context): DefaultRenderersFactory {
+            return DefaultRenderersFactory(context.applicationContext)
+                .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+                .setEnableDecoderFallback(true)
+                .setMediaCodecSelector(preferSoftwareMediaCodecSelector())
+        }
+
+        @OptIn(UnstableApi::class)
+        fun preferSoftwareMediaCodecSelector(): MediaCodecSelector {
+            return MediaCodecSelector { mimeType, requiresSecureDecoder, requiresTunnelingDecoder ->
+                MediaCodecUtil.getDecoderInfos(
+                    mimeType,
+                    requiresSecureDecoder,
+                    requiresTunnelingDecoder,
+                ).sortedBy { info -> if (info.hardwareAccelerated) 1 else 0 }
+            }
+        }
 
         fun concurrentMediaAttributes(): AudioAttributes {
             return AudioAttributes.Builder()
