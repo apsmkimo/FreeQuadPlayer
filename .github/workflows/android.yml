@@ -3,6 +3,9 @@ name: Android CI
 on:
   push:
     branches: [main]
+  # Also build PRs so FFmpeg JNI packaging is verified before merge.
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
