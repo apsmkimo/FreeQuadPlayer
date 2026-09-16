@@ -94,12 +94,12 @@ fun QuadPlayerScreen(
     var pendingPicker by remember { mutableStateOf(false) }
     val playingSnapshot = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
     // SMCPKG_SUPPORT>>>Cursor013
-    var pendingPick by remember { mutableStateOf<Pair<Int, String>?>(null) }
-    val pickerResumeFlags = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
-    var pausedForPicker by remember { mutableStateOf(false) }
+    // var pendingPick by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    // val pickerResumeFlags = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
+    // var pausedForPicker by remember { mutableStateOf(false) }
     // SMCPKG_SUPPORT<<<Cursor013
     // SMCPKG_SUPPORT>>>Cursor014
-    var surfacesReady by remember { mutableStateOf(true) }
+    // var surfacesReady by remember { mutableStateOf(true) }
     // SMCPKG_SUPPORT<<<Cursor014
 
     DisposableEffect(controller) {
@@ -147,67 +147,35 @@ fun QuadPlayerScreen(
     // }
     // SMCPKG_SUPPORT<<<Cursor004
 
-    videoUriStrings.forEachIndexed { index, uriString ->
-        // SMCPKG_SUPPORT>>>Cursor013
-        // LaunchedEffect(uriString) {
-        LaunchedEffect(index, uriString) {
-            if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return@LaunchedEffect
-            // SMCPKG_SUPPORT<<<Cursor013
-            controller.setVideo(
-                index = index,
-                uri = uriString.takeIf { it.isNotEmpty() }?.let(Uri::parse),
-                playWhenReady = uriString.isNotEmpty(),
-            )
-        }
-    }
-
-    // SMCPKG_SUPPORT>>>Cursor013
-    LaunchedEffect(showPicker) {
-        if (showPicker) {
-            surfacesReady = false
-            val snapshot = controller.snapshotPlaying()
-            snapshot.forEachIndexed { index, playing ->
-                if (index < pickerResumeFlags.size) {
-                    pickerResumeFlags[index] = playing
-                }
-            }
-            controller.pauseAll()
-            pausedForPicker = true
-        } else if (pausedForPicker) {
-            // SMCPKG_SUPPORT>>>Cursor014
-            // Wait for picker dispose, then swap, then re-attach surfaces.
-            delay(48)
-            val pick = pendingPick
-            pendingPick = null
-            if (pick != null && pick.first in videoUriStrings.indices) {
-                if (pick.first < pickerResumeFlags.size) {
-                    pickerResumeFlags[pick.first] = true
-                }
-                videoUriStrings = videoUriStrings.toMutableList().also { list ->
-                    list[pick.first] = pick.second
-                }
+    // SMCPKG_SUPPORT>>>Cursor016
+    // videoUriStrings.forEachIndexed { index, uriString ->
+    //     LaunchedEffect(index, uriString) {
+    //         controller.setVideo(index, uriString.takeIf { it.isNotEmpty() }?.let(Uri::parse),
+    //             playWhenReady = uriString.isNotEmpty())
+    //     }
+    // }
+    // Per-index effect: only THIS slot's URI. Empty slots do not call setVideo(null).
+    repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+        val uriString = videoUriStrings.getOrElse(index) { "" }
+        key(index) {
+            LaunchedEffect(uriString) {
+                if (uriString.isEmpty()) return@LaunchedEffect
+                // SMCPKG_SUPPORT>>>Cursor017
+                // First pick composes AndroidView in this same snapshot; wait one
+                // frame so attachPlayerView can bind the TextureView before prepare.
+                // delay(16)
+                // SMCPKG_SUPPORT<<<Cursor017
                 controller.setVideo(
-                    index = pick.first,
-                    uri = pick.second.takeIf { it.isNotEmpty() }?.let(Uri::parse),
+                    index = index,
+                    uri = Uri.parse(uriString),
                     playWhenReady = true,
                 )
             }
-            controller.awaitSwapIdle()
-            surfacesReady = true
-            delay(32)
-            // SMCPKG_SUPPORT<<<Cursor014
-            // SMCPKG_SUPPORT>>>Cursor015
-            // controller.resumePlaying(pickerResumeFlags.toList())
-            controller.restorePlayback(pickerResumeFlags.toList())
-            // SMCPKG_SUPPORT<<<Cursor015
-            pausedForPicker = false
         }
     }
 
-    // SMCPKG_SUPPORT>>>Cursor014
-    // LaunchedEffect(showPicker, pendingPick) { apply URI immediately }
-    // SMCPKG_SUPPORT<<<Cursor014
-    // SMCPKG_SUPPORT<<<Cursor013
+    // LaunchedEffect(showPicker) { pauseAll(); surfacesReady = false; restorePlayback() }
+    // SMCPKG_SUPPORT<<<Cursor016
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -258,14 +226,15 @@ fun QuadPlayerScreen(
         // showPicker = false
         // pendingPicker = false
         val index = pickingIndex
-        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) {
-            showPicker = false
-            pendingPicker = false
-            return
-        }
-        pendingPick = index to uri.toString()
         showPicker = false
         pendingPicker = false
+        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        // SMCPKG_SUPPORT>>>Cursor016
+        // pendingPick = index to uri.toString()
+        videoUriStrings = videoUriStrings.toMutableList().also { list ->
+            list[index] = uri.toString()
+        }
+        // SMCPKG_SUPPORT<<<Cursor016
         // SMCPKG_SUPPORT<<<Cursor013
     }
 
@@ -322,7 +291,13 @@ fun QuadPlayerScreen(
                 player = player,
                 videoUri = uri,
                 onPickVideo = { pickVideo(index) },
-                attachSurface = !showPicker && surfacesReady,
+                // SMCPKG_SUPPORT>>>Cursor017
+                // attachSurface = !(showPicker && index == pickingIndex),
+                // TextureView does not punch through the picker. Keep the cell's
+                // PlayerView mounted so setVideo can attach → prepare → play.
+                attachSurface = true,
+                onTogglePlay = { controller.togglePlay(index) },
+                // SMCPKG_SUPPORT<<<Cursor017
                 onAttachPlayerView = { view -> controller.attachPlayerView(index, view) },
                 onDetachPlayerView = { view -> controller.detachPlayerView(index, view) },
                 modifier = Modifier.fillMaxSize(),

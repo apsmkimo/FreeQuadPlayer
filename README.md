@@ -28,7 +28,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 **Package ID:** `com.example.quadvideoplayer`  
 **SDK:** minSdk 24 · compileSdk 36 · targetSdk 35  
-**Version:** 1.0.5 (`versionCode` 105)
+**Version:** 1.0.8 (`versionCode` 108)
 
 Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven Central. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module with a prebuilt `libffmpegJNI.so` (FFmpeg 6.0). Modern H.264/HEVC streams stay on hardware MediaCodec; FFmpeg is preferred for allowlisted legacy codecs. See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md) for native rebuild notes.
 
@@ -71,4 +71,4 @@ Local `./gradlew assembleDebug` and GitHub Actions CI use the same committed deb
 - Alias: `androiddebugkey`
 - Store / key password: `android`
 
-`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.5 → 105).
+`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.8 → 108).
