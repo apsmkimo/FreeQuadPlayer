@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.net.Uri
 import android.view.LayoutInflater
@@ -53,7 +56,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import com.example.quadvideoplayer.R
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+import com.apsmkimo.tetraview.R
+// SMCPKG_SUPPORT<<<Cursor021
 
 @OptIn(UnstableApi::class)
 @Composable

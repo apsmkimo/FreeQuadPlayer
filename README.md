@@ -6,7 +6,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 ## Key Features
 
-- **Layout picker every launch** — A 2×2 glass tile grid: **2x2 Grid**, **1x4 Stack**, **1x2 Vertical**, **2x1 Horizontal**. The choice is in-session only (not stored). Cold start always shows the picker. Tap the layout button in the player (top-right) to switch without disposing players.
+- **Layout picker every launch** — A 2×2 glass tile grid: **2x2 Grid**, **1x4 Stack**, **1x2 Vertical**, **2x1 Horizontal**. The choice is in-session only (not stored). Cold start always shows the picker. Tap the layout button in the player (top-right) to switch without disposing players. The info button opens **About** (GPLv3, source URL, and open-source component licenses).
 - **2x2 Grid** — Four independent local videos in a landscape 2×2 grid.
 - **1x4 Stack** — Four players stacked top-to-bottom in portrait, hairline separators, FIT letterbox.
 - **1x2 Vertical** — Two players stacked top-to-bottom in portrait.
@@ -28,9 +28,9 @@ TetraView is an open-source Android app for watching up to four local videos at 
 | Thumbnails | Coil (`coil-compose`, `coil-video`) |
 | CI/CD | GitHub Actions (`./gradlew assembleDebug`, artifact `app-debug`) |
 
-**Package ID:** `com.example.quadvideoplayer`  
+**Package ID:** `com.apsmkimo.tetraview`  
 **SDK:** minSdk 24 · compileSdk 36 · targetSdk 35  
-**Version:** 1.0.10 (`versionCode` 110)
+**Version:** 1.0.11 (`versionCode` 111)
 
 Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven Central. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module with a prebuilt `libffmpegJNI.so` (FFmpeg 6.0). Modern H.264/HEVC streams stay on hardware MediaCodec; FFmpeg is preferred for allowlisted legacy codecs. See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md) for native rebuild notes.
 
@@ -73,4 +73,4 @@ Local `./gradlew assembleDebug` and GitHub Actions CI use the same committed deb
 - Alias: `androiddebugkey`
 - Store / key password: `android`
 
-`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.10 → 110).
+`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.11 → 111).

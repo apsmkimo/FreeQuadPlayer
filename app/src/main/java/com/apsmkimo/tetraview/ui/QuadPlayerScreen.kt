@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.content.Intent
 import android.net.Uri
@@ -37,6 +40,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DashboardCustomize
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -58,10 +62,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.example.quadvideoplayer.R
-import com.example.quadvideoplayer.data.PlayerLayout
-import com.example.quadvideoplayer.player.QuadPlayerController
-import com.example.quadvideoplayer.util.VideoPermissions
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+// import com.example.quadvideoplayer.data.PlayerLayout
+// import com.example.quadvideoplayer.player.QuadPlayerController
+// import com.example.quadvideoplayer.util.VideoPermissions
+import com.apsmkimo.tetraview.R
+import com.apsmkimo.tetraview.data.PlayerLayout
+import com.apsmkimo.tetraview.player.QuadPlayerController
+import com.apsmkimo.tetraview.util.VideoPermissions
+// SMCPKG_SUPPORT<<<Cursor021
 import kotlinx.coroutines.delay
 
 private val Hairline = 1.dp
@@ -74,6 +84,9 @@ private val HairlineColor = Color(0xFF5A5A5A)
 fun QuadPlayerScreen(
     layout: PlayerLayout,
     onChangeLayout: () -> Unit,
+    // SMCPKG_SUPPORT>>>Cursor021
+    onAbout: () -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor021
 ) {
 // SMCPKG_SUPPORT<<<Cursor012
     val context = LocalContext.current
@@ -327,21 +340,41 @@ fun QuadPlayerScreen(
 
         if (!showPicker) {
             // SMCPKG_SUPPORT>>>Cursor012
-            IconButton(
-                onClick = onChangeLayout,
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
-                    .padding(end = 8.dp, top = 4.dp)
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0x99000000)),
+                    .padding(end = 8.dp, top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.DashboardCustomize,
-                    contentDescription = stringResource(R.string.change_layout),
-                    tint = Color.White,
-                )
+                // SMCPKG_SUPPORT>>>Cursor021
+                IconButton(
+                    onClick = onAbout,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x99000000)),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = stringResource(R.string.about_title),
+                        tint = Color.White,
+                    )
+                }
+                // SMCPKG_SUPPORT<<<Cursor021
+                IconButton(
+                    onClick = onChangeLayout,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x99000000)),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.DashboardCustomize,
+                        contentDescription = stringResource(R.string.change_layout),
+                        tint = Color.White,
+                    )
+                }
             }
             // SMCPKG_SUPPORT<<<Cursor012
             PermissionBanner(

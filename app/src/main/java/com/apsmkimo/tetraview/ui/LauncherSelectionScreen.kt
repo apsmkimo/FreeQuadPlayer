@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -34,7 +37,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -55,8 +63,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import com.example.quadvideoplayer.R
-import com.example.quadvideoplayer.data.PlayerLayout
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+// import com.example.quadvideoplayer.data.PlayerLayout
+import com.apsmkimo.tetraview.R
+import com.apsmkimo.tetraview.data.PlayerLayout
+// SMCPKG_SUPPORT<<<Cursor021
 
 private val ScreenBlack = Color(0xFF000000)
 private val GlassTop = Color(0x99313B4D)
@@ -70,6 +82,9 @@ private val LabelWhite = Color(0xFFFFFFFF)
 fun LauncherSelectionScreen(
     onLayoutSelected: (PlayerLayout) -> Unit,
     onCancel: (() -> Unit)? = null,
+    // SMCPKG_SUPPORT>>>Cursor021
+    onAbout: () -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor021
     modifier: Modifier = Modifier,
 ) {
     if (onCancel != null) {
@@ -85,10 +100,14 @@ fun LauncherSelectionScreen(
             .fillMaxSize()
             .background(ScreenBlack)
             .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp),
-        contentAlignment = Alignment.Center,
+            .navigationBarsPadding(),
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
         BoxWithConstraints {
             val gap = 18.dp
             val tile = min((maxWidth - gap) / 2, (maxHeight - gap) / 2)
@@ -127,6 +146,24 @@ fun LauncherSelectionScreen(
                 }
             }
         }
+        }
+        // SMCPKG_SUPPORT>>>Cursor021
+        IconButton(
+            onClick = onAbout,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 8.dp, top = 4.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color(0x33202A3A)),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = stringResource(R.string.about_title),
+                tint = LabelWhite,
+            )
+        }
+        // SMCPKG_SUPPORT<<<Cursor021
     }
     // SMCPKG_SUPPORT<<<Cursor020
 }

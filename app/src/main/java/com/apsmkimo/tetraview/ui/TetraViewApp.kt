@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
@@ -30,8 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.quadvideoplayer.data.LayoutPreferences
-import com.example.quadvideoplayer.data.PlayerLayout
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.data.LayoutPreferences
+// import com.example.quadvideoplayer.data.PlayerLayout
+import com.apsmkimo.tetraview.data.LayoutPreferences
+import com.apsmkimo.tetraview.data.PlayerLayout
+// SMCPKG_SUPPORT<<<Cursor021
 
 /**
  * Every cold start shows [LauncherSelectionScreen]. The chosen layout is
@@ -49,6 +56,10 @@ fun TetraViewApp() {
     var layout by remember { mutableStateOf<PlayerLayout?>(null) }
     var showSelection by remember { mutableStateOf(true) }
     // SMCPKG_SUPPORT<<<Cursor019
+    // SMCPKG_SUPPORT>>>Cursor021
+    var showAbout by remember { mutableStateOf(false) }
+    var showLicense by remember { mutableStateOf(false) }
+    // SMCPKG_SUPPORT<<<Cursor021
 
     LaunchedEffect(Unit) {
         LayoutPreferences.clear(context)
@@ -78,20 +89,35 @@ fun TetraViewApp() {
     // } else { ... overlay picker ... }
     val selected = layout
     if (selected == null) {
-        LauncherSelectionScreen(onLayoutSelected = ::applyLayout)
+        LauncherSelectionScreen(
+            onLayoutSelected = ::applyLayout,
+            onAbout = { showAbout = true },
+        )
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             QuadPlayerScreen(
                 layout = selected,
                 onChangeLayout = { showSelection = true },
+                onAbout = { showAbout = true },
             )
             if (showSelection) {
                 LauncherSelectionScreen(
                     onLayoutSelected = ::applyLayout,
                     onCancel = { showSelection = false },
+                    onAbout = { showAbout = true },
                 )
             }
         }
     }
     // SMCPKG_SUPPORT<<<Cursor019
+    // SMCPKG_SUPPORT>>>Cursor021
+    if (showLicense) {
+        LicenseTextScreen(onClose = { showLicense = false })
+    } else if (showAbout) {
+        AboutScreen(
+            onClose = { showAbout = false },
+            onViewLicense = { showLicense = true },
+        )
+    }
+    // SMCPKG_SUPPORT<<<Cursor021
 }

@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -66,8 +69,12 @@ import androidx.compose.ui.zIndex
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.example.quadvideoplayer.R
-import com.example.quadvideoplayer.data.LocalVideoStore
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+// import com.example.quadvideoplayer.data.LocalVideoStore
+import com.apsmkimo.tetraview.R
+import com.apsmkimo.tetraview.data.LocalVideoStore
+// SMCPKG_SUPPORT<<<Cursor021
 import kotlin.math.abs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

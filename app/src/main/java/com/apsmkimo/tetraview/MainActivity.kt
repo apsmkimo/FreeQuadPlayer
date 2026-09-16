@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer
+package com.apsmkimo.tetraview
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.os.Build
 import android.os.Bundle
@@ -27,8 +30,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.quadvideoplayer.ui.TetraViewApp
-import com.example.quadvideoplayer.ui.theme.QuadVideoPlayerTheme
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.ui.TetraViewApp
+// import com.example.quadvideoplayer.ui.theme.QuadVideoPlayerTheme
+import com.apsmkimo.tetraview.ui.TetraViewApp
+import com.apsmkimo.tetraview.ui.theme.QuadVideoPlayerTheme
+// SMCPKG_SUPPORT<<<Cursor021
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
