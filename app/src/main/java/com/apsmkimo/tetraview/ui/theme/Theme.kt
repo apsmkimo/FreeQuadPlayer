@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui.theme
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui.theme
+package com.apsmkimo.tetraview.ui.theme
+// SMCPKG_SUPPORT<<<Cursor021
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

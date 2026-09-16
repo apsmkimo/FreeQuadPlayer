@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.content.Intent
 import android.net.Uri
@@ -37,6 +40,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DashboardCustomize
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -58,10 +62,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.example.quadvideoplayer.R
-import com.example.quadvideoplayer.data.PlayerLayout
-import com.example.quadvideoplayer.player.QuadPlayerController
-import com.example.quadvideoplayer.util.VideoPermissions
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+// import com.example.quadvideoplayer.data.PlayerLayout
+// import com.example.quadvideoplayer.player.QuadPlayerController
+// import com.example.quadvideoplayer.util.VideoPermissions
+import com.apsmkimo.tetraview.R
+import com.apsmkimo.tetraview.data.PlayerLayout
+import com.apsmkimo.tetraview.player.QuadPlayerController
+import com.apsmkimo.tetraview.util.VideoPermissions
+// SMCPKG_SUPPORT<<<Cursor021
 import kotlinx.coroutines.delay
 
 private val Hairline = 1.dp
@@ -74,6 +84,9 @@ private val HairlineColor = Color(0xFF5A5A5A)
 fun QuadPlayerScreen(
     layout: PlayerLayout,
     onChangeLayout: () -> Unit,
+    // SMCPKG_SUPPORT>>>Cursor021
+    onAbout: () -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor021
 ) {
 // SMCPKG_SUPPORT<<<Cursor012
     val context = LocalContext.current
@@ -109,10 +122,21 @@ fun QuadPlayerScreen(
     // SMCPKG_SUPPORT>>>Cursor015
     LaunchedEffect(layout) {
         delay(32)
+        // SMCPKG_SUPPORT>>>Cursor019
+        // Pause panes that are not composed in 2-window modes so they
+        // cannot play audio without a surface. Visible cells are restored.
+        for (index in layout.paneCount until QuadPlayerController.PLAYER_COUNT) {
+            controller.players.getOrNull(index)?.pause()
+        }
+        // SMCPKG_SUPPORT<<<Cursor019
         controller.reattachAllBoundViews()
         controller.restorePlayback(
             List(QuadPlayerController.PLAYER_COUNT) { index ->
-                controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                // SMCPKG_SUPPORT>>>Cursor019
+                // controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                index < layout.paneCount &&
+                    controller.players.getOrNull(index)?.mediaItemCount?.let { it > 0 } == true
+                // SMCPKG_SUPPORT<<<Cursor019
             },
         )
     }
@@ -155,7 +179,10 @@ fun QuadPlayerScreen(
     //     }
     // }
     // Per-index effect: only THIS slot's URI. Empty slots do not call setVideo(null).
-    repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+    // SMCPKG_SUPPORT>>>Cursor019
+    // repeat(QuadPlayerController.PLAYER_COUNT) { index ->
+    repeat(layout.paneCount) { index ->
+    // SMCPKG_SUPPORT<<<Cursor019
         val uriString = videoUriStrings.getOrElse(index) { "" }
         key(index) {
             LaunchedEffect(uriString) {
@@ -228,7 +255,10 @@ fun QuadPlayerScreen(
         val index = pickingIndex
         showPicker = false
         pendingPicker = false
-        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        // SMCPKG_SUPPORT>>>Cursor019
+        // if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        if (index !in 0 until layout.paneCount) return
+        // SMCPKG_SUPPORT<<<Cursor019
         // SMCPKG_SUPPORT>>>Cursor016
         // pendingPick = index to uri.toString()
         videoUriStrings = videoUriStrings.toMutableList().also { list ->
@@ -239,7 +269,10 @@ fun QuadPlayerScreen(
     }
 
     fun pickVideo(index: Int) {
-        if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        // SMCPKG_SUPPORT>>>Cursor019
+        // if (index !in 0 until QuadPlayerController.PLAYER_COUNT) return
+        if (index !in 0 until layout.paneCount) return
+        // SMCPKG_SUPPORT<<<Cursor019
         pickingIndex = index
         if (VideoPermissions.hasReadAccess(context)) {
             hasPermission = true
@@ -307,21 +340,41 @@ fun QuadPlayerScreen(
 
         if (!showPicker) {
             // SMCPKG_SUPPORT>>>Cursor012
-            IconButton(
-                onClick = onChangeLayout,
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
-                    .padding(end = 8.dp, top = 4.dp)
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0x99000000)),
+                    .padding(end = 8.dp, top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.DashboardCustomize,
-                    contentDescription = stringResource(R.string.change_layout),
-                    tint = Color.White,
-                )
+                // SMCPKG_SUPPORT>>>Cursor021
+                IconButton(
+                    onClick = onAbout,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x99000000)),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = stringResource(R.string.about_title),
+                        tint = Color.White,
+                    )
+                }
+                // SMCPKG_SUPPORT<<<Cursor021
+                IconButton(
+                    onClick = onChangeLayout,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x99000000)),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.DashboardCustomize,
+                        contentDescription = stringResource(R.string.change_layout),
+                        tint = Color.White,
+                    )
+                }
             }
             // SMCPKG_SUPPORT<<<Cursor012
             PermissionBanner(
@@ -399,6 +452,42 @@ private fun PlayerPaneGrid(
                 }
             }
         }
+
+        // SMCPKG_SUPPORT>>>Cursor019
+        PlayerLayout.VERTICAL_1X2 -> {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(2) { index ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    ) {
+                        key(index) { cell(index) }
+                    }
+                }
+            }
+        }
+
+        PlayerLayout.LANDSCAPE_2X1 -> {
+            Row(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(Hairline),
+            ) {
+                repeat(2) { index ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    ) {
+                        key(index) { cell(index) }
+                    }
+                }
+            }
+        }
+        // SMCPKG_SUPPORT<<<Cursor019
     }
 }
 // SMCPKG_SUPPORT<<<Cursor013

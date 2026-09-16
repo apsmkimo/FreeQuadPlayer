@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.quadvideoplayer.R
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+import com.apsmkimo.tetraview.R
+// SMCPKG_SUPPORT<<<Cursor021
 
 @Composable
 fun PermissionBanner(

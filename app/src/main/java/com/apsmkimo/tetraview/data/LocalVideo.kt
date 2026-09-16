@@ -16,27 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.util
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.data
+package com.apsmkimo.tetraview.data
+// SMCPKG_SUPPORT<<<Cursor021
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.content.ContextCompat
+import android.net.Uri
 
-object VideoPermissions {
-    fun requiredPermission(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_VIDEO
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-    }
+data class LocalVideo(
+    val id: Long,
+    val uri: Uri,
+    val displayName: String,
+    val durationMs: Long,
+    // SMCPKG_SUPPORT>>>Cursor006
+    val bucketId: Long,
+    val bucketDisplayName: String,
+    // SMCPKG_SUPPORT<<<Cursor006
+)
 
-    fun hasReadAccess(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            requiredPermission(),
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-}
+data class LocalVideoFolder(
+    val bucketId: Long,
+    val displayName: String,
+    val videoCount: Int,
+    val coverUri: Uri?,
+)

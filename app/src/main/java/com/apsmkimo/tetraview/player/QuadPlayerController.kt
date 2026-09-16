@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.player
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.player
+package com.apsmkimo.tetraview.player
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.content.Context
 import android.net.Uri

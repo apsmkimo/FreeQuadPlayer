@@ -16,30 +16,43 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.data
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.data
+package com.apsmkimo.tetraview.data
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.content.Context
 
 /**
- * Stores the last chosen [PlayerLayout] in SharedPreferences.
- * A missing key means the user has not picked a mode yet (show LauncherSelectionScreen).
+ * Legacy SharedPreferences for layout. 1.0.9 no longer persists a choice;
+ * every cold start shows the picker. [clear] wipes any leftover key.
  */
 object LayoutPreferences {
     private const val PREFS_NAME = "tetraview_layout"
     private const val KEY_LAYOUT = "player_layout"
 
-    fun load(context: Context): PlayerLayout? {
-        val raw = context.applicationContext
-            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_LAYOUT, null)
-        return PlayerLayout.fromPref(raw)
-    }
+    // SMCPKG_SUPPORT>>>Cursor019
+    // fun load(context: Context): PlayerLayout? {
+    //     val raw = context.applicationContext
+    //         .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    //         .getString(KEY_LAYOUT, null)
+    //     return PlayerLayout.fromPref(raw)
+    // }
+    //
+    // fun save(context: Context, layout: PlayerLayout) {
+    //     context.applicationContext
+    //         .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    //         .edit()
+    //         .putString(KEY_LAYOUT, layout.prefValue)
+    //         .apply()
+    // }
 
-    fun save(context: Context, layout: PlayerLayout) {
+    fun clear(context: Context) {
         context.applicationContext
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
-            .putString(KEY_LAYOUT, layout.prefValue)
+            .remove(KEY_LAYOUT)
             .apply()
     }
+    // SMCPKG_SUPPORT<<<Cursor019
 }

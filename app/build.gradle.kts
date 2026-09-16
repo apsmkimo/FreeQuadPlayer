@@ -15,11 +15,14 @@ plugins {
 // val APP_VERSION_NAME = "1.0.5"
 // val APP_VERSION_NAME = "1.0.6"
 // val APP_VERSION_NAME = "1.0.7"
-val APP_VERSION_NAME = "1.0.8"
+// val APP_VERSION_NAME = "1.0.8"
+// val APP_VERSION_NAME = "1.0.9"
+// val APP_VERSION_NAME = "1.0.10"
+val APP_VERSION_NAME = "1.0.11"
 // SMCPKG_SUPPORT<<<Cursor011
 
 /**
- * Maps versionName to versionCode: 1.0.0 → 100 … 1.0.8 → 108.
+ * Maps versionName to versionCode: 1.0.0 → 100 … 1.0.11 → 111.
  * Increment versionCode by 1 whenever versionName increases by 0.01.
  */
 fun versionCodeFor(versionName: String): Int {
@@ -33,14 +36,20 @@ fun versionCodeFor(versionName: String): Int {
 // SMCPKG_SUPPORT<<<Cursor009
 
 android {
-    namespace = "com.example.quadvideoplayer"
+    // SMCPKG_SUPPORT>>>Cursor021
+    // namespace = "com.example.quadvideoplayer"
+    namespace = "com.apsmkimo.tetraview"
+    // SMCPKG_SUPPORT<<<Cursor021
     // SMCPKG_SUPPORT>>>Cursor001
     // compileSdk = 35
     compileSdk = 36
     // SMCPKG_SUPPORT<<<Cursor001
 
     defaultConfig {
-        applicationId = "com.example.quadvideoplayer"
+        // SMCPKG_SUPPORT>>>Cursor021
+        // applicationId = "com.example.quadvideoplayer"
+        applicationId = "com.apsmkimo.tetraview"
+        // SMCPKG_SUPPORT<<<Cursor021
         minSdk = 24
         targetSdk = 35
         // SMCPKG_SUPPORT>>>Cursor009

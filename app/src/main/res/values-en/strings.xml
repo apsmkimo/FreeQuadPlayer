@@ -28,11 +28,32 @@
     <string name="cell_mute">Mute</string>
     <string name="cell_unmute">Unmute</string>
     <!-- SMCPKG_SUPPORT>>>Cursor012 -->
-    <string name="layout_selection_title">Choose a layout</string>
-    <string name="layout_vertical_title">Vertical Mode (1x4 Stack)</string>
-    <string name="layout_vertical_body">Portrait orientation. Four players stacked top-to-bottom, full width each, FIT letterbox like 2x2.</string>
-    <string name="layout_landscape_title">Landscape Mode (2x2 Grid)</string>
-    <string name="layout_landscape_body">Force landscape and keep the current 2x2 grid.</string>
+    <!-- <string name="layout_selection_title">Choose a layout</string> -->
+    <!-- <string name="layout_vertical_title">Vertical Mode (1x4 Stack)</string> -->
+    <!-- <string name="layout_vertical_body">Portrait orientation. Four players stacked top-to-bottom, full width each, FIT letterbox like 2x2.</string> -->
+    <!-- <string name="layout_landscape_title">Landscape Mode (2x2 Grid)</string> -->
+    <!-- <string name="layout_landscape_body">Force landscape and keep the current 2x2 grid.</string> -->
     <string name="change_layout">Change layout</string>
     <!-- SMCPKG_SUPPORT<<<Cursor012 -->
+    <!-- SMCPKG_SUPPORT>>>Cursor019 -->
+    <string name="layout_2x2_grid">2x2 Grid</string>
+    <!-- <string name="layout_1x4_stack">1x stack (1x4)</string> -->
+    <string name="layout_1x4_stack">1x4 Stack</string>
+    <string name="layout_1x2_vertical">1x2 Vertical</string>
+    <string name="layout_2x1_horizontal">2x1 Horizontal</string>
+    <!-- SMCPKG_SUPPORT<<<Cursor019 -->
+    <!-- SMCPKG_SUPPORT>>>Cursor021 -->
+    <string name="about_title">About</string>
+    <string name="about_close">Back</string>
+    <string name="about_version_line">Version %1$s (versionCode %2$s)</string>
+    <string name="about_gpl_statement">TetraView is free software licensed under the GNU General Public License v3.0 (GPLv3). You may redistribute and modify it under the terms of that license.</string>
+    <string name="about_view_license">View GPLv3 license</string>
+    <string name="about_license_online">Open LICENSE on GitHub</string>
+    <string name="about_license_title">GNU GPLv3</string>
+    <string name="about_license_missing">LICENSE text is missing from the APK. See https://github.com/apsmkimo/FreeQuadPlayer/blob/main/LICENSE</string>
+    <string name="about_source_label">Source code</string>
+    <string name="about_components_title">Open-source components</string>
+    <string name="about_components_body">Media3 ExoPlayer (Apache 2.0); Media3 FFmpeg extension and FFmpeg (LGPL/GPL as shipped); Coil (Apache 2.0); AndroidX / Jetpack Compose (Apache 2.0). Full license texts are in the GitHub repository.</string>
+    <string name="about_permissions">Permissions: READ_MEDIA_VIDEO (Android 13+) or READ_EXTERNAL_STORAGE (older Android) only to browse and play local videos. This app does not request MANAGE_EXTERNAL_STORAGE.</string>
+    <!-- SMCPKG_SUPPORT<<<Cursor021 -->
 </resources>

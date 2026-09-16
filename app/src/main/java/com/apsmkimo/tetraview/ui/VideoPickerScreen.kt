@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.example.quadvideoplayer.ui
+// SMCPKG_SUPPORT>>>Cursor021
+// package com.example.quadvideoplayer.ui
+package com.apsmkimo.tetraview.ui
+// SMCPKG_SUPPORT<<<Cursor021
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -69,10 +72,16 @@ import coil.decode.VideoFrameDecoder
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
-import com.example.quadvideoplayer.R
-import com.example.quadvideoplayer.data.LocalVideo
-import com.example.quadvideoplayer.data.LocalVideoFolder
-import com.example.quadvideoplayer.data.LocalVideoStore
+// SMCPKG_SUPPORT>>>Cursor021
+// import com.example.quadvideoplayer.R
+// import com.example.quadvideoplayer.data.LocalVideo
+// import com.example.quadvideoplayer.data.LocalVideoFolder
+// import com.example.quadvideoplayer.data.LocalVideoStore
+import com.apsmkimo.tetraview.R
+import com.apsmkimo.tetraview.data.LocalVideo
+import com.apsmkimo.tetraview.data.LocalVideoFolder
+import com.apsmkimo.tetraview.data.LocalVideoStore
+// SMCPKG_SUPPORT<<<Cursor021
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
