@@ -2,6 +2,7 @@ package com.example.quadvideoplayer.ui
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -235,19 +238,24 @@ private fun VideoPickerItem(
                 uri = video.uri,
                 contentDescription = video.displayName,
             )
-            Surface(
-                color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
+            // SMCPKG_SUPPORT>>>Cursor007
+            // Surface(
+            //     color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
+            //     ...
+            //     color = MaterialTheme.colorScheme.onPrimary,
+            // )
+            Text(
+                text = LocalVideoStore.formatDuration(video.durationMs),
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(6.dp),
-            ) {
-                Text(
-                    text = LocalVideoStore.formatDuration(video.durationMs),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                )
-            }
+                    .padding(6.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+            // SMCPKG_SUPPORT<<<Cursor007
         }
         Text(
             text = video.displayName,
