@@ -19,6 +19,7 @@
 package com.example.quadvideoplayer.ui
 
 import android.net.Uri
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
@@ -65,6 +66,9 @@ fun VideoCell(
     // SMCPKG_SUPPORT>>>Cursor013
     attachSurface: Boolean = true,
     // SMCPKG_SUPPORT<<<Cursor013
+    // SMCPKG_SUPPORT>>>Cursor014
+    onBindPlayerView: (PlayerView?) -> Unit = {},
+    // SMCPKG_SUPPORT<<<Cursor014
 ) {
     // SMCPKG_SUPPORT>>>Cursor004
     // val shape = RoundedCornerShape(12.dp)
@@ -113,7 +117,13 @@ fun VideoCell(
         } else {
             AndroidView(
                 factory = { context ->
-                    PlayerView(context).apply {
+                    // SMCPKG_SUPPORT>>>Cursor014
+                    // PlayerView(context).apply { this.player = player }
+                    (LayoutInflater.from(context).inflate(
+                        R.layout.player_view_texture,
+                        null,
+                        false,
+                    ) as PlayerView).apply {
                         useController = false
                         controllerAutoShow = false
                         // SMCPKG_SUPPORT>>>Cursor005
@@ -128,8 +138,8 @@ fun VideoCell(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-                        this.player = player
                     }
+                    // SMCPKG_SUPPORT<<<Cursor014
                 },
                 update = { view ->
                     view.useController = false
@@ -138,9 +148,15 @@ fun VideoCell(
                     view.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     view.setBackgroundColor(android.graphics.Color.BLACK)
                     // SMCPKG_SUPPORT<<<Cursor005
-                    view.player = player
+                    // SMCPKG_SUPPORT>>>Cursor014
+                    // view.player = player
+                    onBindPlayerView(view)
+                    // SMCPKG_SUPPORT<<<Cursor014
                 },
                 onRelease = { view ->
+                    // SMCPKG_SUPPORT>>>Cursor014
+                    onBindPlayerView(null)
+                    // SMCPKG_SUPPORT<<<Cursor014
                     view.player = null
                 },
                 modifier = Modifier.fillMaxSize(),

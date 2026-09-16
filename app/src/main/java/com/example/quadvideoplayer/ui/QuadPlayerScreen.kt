@@ -61,6 +61,7 @@ import com.example.quadvideoplayer.R
 import com.example.quadvideoplayer.data.PlayerLayout
 import com.example.quadvideoplayer.player.QuadPlayerController
 import com.example.quadvideoplayer.util.VideoPermissions
+import kotlinx.coroutines.delay
 
 private val Hairline = 1.dp
 private val HairlineColor = Color(0xFF5A5A5A)
@@ -96,6 +97,9 @@ fun QuadPlayerScreen(
     val pickerResumeFlags = remember { MutableList(QuadPlayerController.PLAYER_COUNT) { false } }
     var pausedForPicker by remember { mutableStateOf(false) }
     // SMCPKG_SUPPORT<<<Cursor013
+    // SMCPKG_SUPPORT>>>Cursor014
+    var surfacesReady by remember { mutableStateOf(true) }
+    // SMCPKG_SUPPORT<<<Cursor014
 
     DisposableEffect(controller) {
         onDispose { controller.releaseAll() }
@@ -146,6 +150,7 @@ fun QuadPlayerScreen(
     // SMCPKG_SUPPORT>>>Cursor013
     LaunchedEffect(showPicker) {
         if (showPicker) {
+            surfacesReady = false
             val snapshot = controller.snapshotPlaying()
             snapshot.forEachIndexed { index, playing ->
                 if (index < pickerResumeFlags.size) {
@@ -155,21 +160,32 @@ fun QuadPlayerScreen(
             controller.pauseAll()
             pausedForPicker = true
         } else if (pausedForPicker) {
+            // SMCPKG_SUPPORT>>>Cursor014
+            // Wait for picker dispose, then swap, then re-attach surfaces.
+            delay(48)
+            val pick = pendingPick
+            pendingPick = null
+            if (pick != null && pick.first in videoUriStrings.indices) {
+                videoUriStrings = videoUriStrings.toMutableList().also { list ->
+                    list[pick.first] = pick.second
+                }
+                controller.setVideo(
+                    index = pick.first,
+                    uri = pick.second.takeIf { it.isNotEmpty() }?.let(Uri::parse),
+                    playWhenReady = pick.second.isNotEmpty(),
+                )
+            }
+            controller.awaitSwapIdle()
+            surfacesReady = true
+            // SMCPKG_SUPPORT<<<Cursor014
             controller.resumePlaying(pickerResumeFlags.toList())
             pausedForPicker = false
         }
     }
 
-    LaunchedEffect(showPicker, pendingPick) {
-        val pick = pendingPick ?: return@LaunchedEffect
-        if (showPicker) return@LaunchedEffect
-        pendingPick = null
-        if (pick.first in videoUriStrings.indices) {
-            videoUriStrings = videoUriStrings.toMutableList().also { list ->
-                list[pick.first] = pick.second
-            }
-        }
-    }
+    // SMCPKG_SUPPORT>>>Cursor014
+    // LaunchedEffect(showPicker, pendingPick) { apply URI immediately }
+    // SMCPKG_SUPPORT<<<Cursor014
     // SMCPKG_SUPPORT<<<Cursor013
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -285,7 +301,8 @@ fun QuadPlayerScreen(
                 player = player,
                 videoUri = uri,
                 onPickVideo = { pickVideo(index) },
-                attachSurface = !showPicker,
+                attachSurface = !showPicker && surfacesReady,
+                onBindPlayerView = { view -> controller.bindPlayerView(index, view) },
                 modifier = Modifier.fillMaxSize(),
             )
         }
