@@ -14,7 +14,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 - **Intelligent Aspect-Ratio Matching** — Each cell uses FIT scaling so videos keep their native aspect ratio, with letterboxing or pillarboxing (black bars) when dimensions do not match the cell.
 - **Folder-Grouped Video Picker** — Browse local videos by device directory (MediaStore buckets) with Coil thumbnails, file names, and durations instead of a flat system file browser.
 - **Ultra-Thin Borders & Clean UI** — No title or action bar; cells maximize the viewing area with hairline separators only.
-- **4-Way Independent Gesture Controls & Simultaneous Audio Mixing** — Per-cell overlay play/pause, seek, time labels, mute, and long-press volume gestures; all four players can output audio together.
+- **4-Way Independent Gesture Controls & Simultaneous Audio Mixing** — Per-cell overlay play/pause, seek, time labels, and mute. Press and vertical-drag on a playing cell to change that cell’s volume (HUD bar is ~80% of screen height). All players can output audio together.
 - **Built-in High Fault-Tolerance for Legacy Formats** — FFmpeg-prefer software decoding for common old AVI codecs, audio-driven sync, skip/drop of late frames, and generous per-player buffering for smoother legacy playback.
 
 ## Tech Stack
@@ -30,7 +30,7 @@ TetraView is an open-source Android app for watching up to four local videos at 
 
 **Package ID:** `com.apsmkimo.tetraview`  
 **SDK:** minSdk 24 · compileSdk 36 · targetSdk 35  
-**Version:** 1.0.12 (`versionCode` 112)
+**Version:** 1.0.13 (`versionCode` 113)
 
 Official `androidx.media3:media3-decoder-ffmpeg` is not published on Maven Central. TetraView vendors the Media3 1.11.0 `decoder_ffmpeg` module with a prebuilt `libffmpegJNI.so` (FFmpeg 6.0). Modern H.264/HEVC streams stay on hardware MediaCodec; FFmpeg is preferred for allowlisted legacy codecs. See [decoder-ffmpeg/README.md](decoder-ffmpeg/README.md) for native rebuild notes.
 
@@ -73,4 +73,4 @@ Local `./gradlew assembleDebug` and GitHub Actions CI use the same committed deb
 - Alias: `androiddebugkey`
 - Store / key password: `android`
 
-`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.12 → 112).
+`app/build.gradle.kts` `signingConfigs.debug` points at that file. `*.keystore` stays in `.gitignore` except this one (`!app/debug.keystore`). If you still see a signing mismatch, the device has an older APK signed with a different key—uninstall once, then future upgrades from this keystore will succeed. `versionCode` must also increase (1.0.13 → 113).
