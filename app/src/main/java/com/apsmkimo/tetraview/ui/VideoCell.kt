@@ -60,7 +60,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+// SMCPKG_SUPPORT>>>Cursor024
+// import androidx.compose.ui.platform.LocalDensity
+// SMCPKG_SUPPORT<<<Cursor024
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -116,7 +118,9 @@ fun VideoCell(
     var overlayVolume by remember { mutableFloatStateOf(player.volume.coerceIn(0f, 1f)) }
     val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
     val volumeBarHeight = screenHeightDp * 0.8f
-    val density = LocalDensity.current
+    // SMCPKG_SUPPORT>>>Cursor024
+    // val density = LocalDensity.current
+    // SMCPKG_SUPPORT<<<Cursor024
     // SMCPKG_SUPPORT<<<Cursor023
 
     Box(
@@ -130,16 +134,32 @@ fun VideoCell(
             // .background(MaterialTheme.colorScheme.background)
             .background(androidx.compose.ui.graphics.Color.Black)
             // SMCPKG_SUPPORT<<<Cursor005
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-            ) {
+            // SMCPKG_SUPPORT>>>Cursor024
+            // .clickable(
+            //     indication = null,
+            //     interactionSource = remember { MutableInteractionSource() },
+            // ) {
+            //     if (videoUri == null) {
+            //         onPickVideo()
+            //     } else {
+            //         controlsVisible = !controlsVisible
+            //     }
+            // },
+            // Empty cells still pick a video. Playing cells use pointerInput only
+            // so a tap is not consumed twice (clickable + gesture = net no-op).
+            .then(
                 if (videoUri == null) {
-                    onPickVideo()
+                    Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) {
+                        onPickVideo()
+                    }
                 } else {
-                    controlsVisible = !controlsVisible
-                }
-            },
+                    Modifier
+                },
+            ),
+            // SMCPKG_SUPPORT<<<Cursor024
     ) {
         if (videoUri == null) {
             EmptyVideoPlaceholder(index = index)
@@ -221,18 +241,39 @@ fun VideoCell(
             // Transparent tap target above PlayerView so Compose receives show/hide taps.
             // Box(Modifier.fillMaxSize().clickable { controlsVisible = !controlsVisible })
             // Press + vertical drag on the video surface adjusts this cell's volume.
+            // SMCPKG_SUPPORT>>>Cursor024
+            // Box(
+            //     modifier = Modifier
+            //         .fillMaxSize()
+            //         .zIndex(1f)
+            //         .pointerInput(player) {
+            //             val slopPx = 16f
+            //             val fullTravelPx = with(density) { volumeBarHeight.toPx() }
+            //                 .coerceAtLeast(1f)
+            //             awaitEachGesture {
+            //                 ...
+            //                 if (!dragged) controlsVisible = !controlsVisible
+            //                 volume = player.volume - dy / fullTravelPx
+            //             }
+            //         },
+            // ) { ... SurfaceVolumeBar ... }
+            // if (controlsVisible) {
+            //     CellPlaybackBar(..., Modifier.align(Alignment.BottomCenter))
+            // }
+            // 1.0.13 hid the toolbar: parent clickable + this tap both toggled
+            // controlsVisible, and the zIndex(1) layer sat on top of the bar.
+            // Tap (movement <= slop) shows/hides the bar. Vertical-dominant
+            // drag maps absolute Y in the cell: top = 1f, bottom = 0f.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(1f)
                     .pointerInput(player) {
-                        val slopPx = 16f
-                        val fullTravelPx = with(density) { volumeBarHeight.toPx() }
-                            .coerceAtLeast(1f)
+                        val slopPx = viewConfiguration.touchSlop
                         awaitEachGesture {
                             val down = awaitFirstDown()
                             var dragged = false
-                            var lastY = down.position.y
+                            val cellH = size.height.toFloat().coerceAtLeast(1f)
                             while (true) {
                                 val event = awaitPointerEvent()
                                 val change = event.changes.firstOrNull() ?: break
@@ -243,20 +284,20 @@ fun VideoCell(
                                     volumeOverlayVisible = false
                                     break
                                 }
-                                val dy = change.position.y - lastY
-                                if (!dragged && abs(change.position.y - down.position.y) > slopPx) {
+                                val dx = change.position.x - down.position.x
+                                val dy = change.position.y - down.position.y
+                                if (!dragged && abs(dy) > slopPx && abs(dy) > abs(dx)) {
                                     dragged = true
                                     overlayVolume = player.volume.coerceIn(0f, 1f)
                                     volumeOverlayVisible = true
                                 }
                                 if (dragged) {
-                                    val next = (player.volume - dy / fullTravelPx)
+                                    val next = (1f - (change.position.y.coerceIn(0f, cellH) / cellH))
                                         .coerceIn(0f, 1f)
                                     player.volume = next
                                     overlayVolume = next
                                     change.consume()
                                 }
-                                lastY = change.position.y
                             }
                             volumeOverlayVisible = false
                         }
@@ -272,7 +313,6 @@ fun VideoCell(
                     )
                 }
             }
-            // SMCPKG_SUPPORT<<<Cursor023
 
             if (controlsVisible) {
                 CellPlaybackBar(
@@ -281,9 +321,13 @@ fun VideoCell(
                     // SMCPKG_SUPPORT>>>Cursor017
                     onTogglePlay = onTogglePlay,
                     // SMCPKG_SUPPORT<<<Cursor017
-                    modifier = Modifier.align(Alignment.BottomCenter),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .zIndex(2f),
                 )
             }
+            // SMCPKG_SUPPORT<<<Cursor024
+            // SMCPKG_SUPPORT<<<Cursor023
         }
 
         // SMCPKG_SUPPORT>>>Cursor004

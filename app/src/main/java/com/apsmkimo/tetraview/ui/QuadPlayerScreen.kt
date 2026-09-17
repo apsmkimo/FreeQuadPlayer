@@ -99,9 +99,15 @@ fun QuadPlayerScreen(
     val context = LocalContext.current
     val controller = remember { QuadPlayerController(context) }
 
-    var videoUriStrings by rememberSaveable {
+    // SMCPKG_SUPPORT>>>Cursor024
+    // var videoUriStrings by rememberSaveable {
+    //     mutableStateOf(List(QuadPlayerController.PLAYER_COUNT) { "" })
+    // }
+    // Session URIs must not survive SavedState or a return to selection.
+    var videoUriStrings by remember {
         mutableStateOf(List(QuadPlayerController.PLAYER_COUNT) { "" })
     }
+    // SMCPKG_SUPPORT<<<Cursor024
     // SMCPKG_SUPPORT>>>Cursor004
     // var unmutedIndex by rememberSaveable {
     //     mutableIntStateOf(QuadPlayerController.DEFAULT_UNMUTED_INDEX)
@@ -298,6 +304,14 @@ fun QuadPlayerScreen(
         context.startActivity(intent)
     }
 
+    // SMCPKG_SUPPORT>>>Cursor024
+    fun leaveToSelection() {
+        videoUriStrings = List(QuadPlayerController.PLAYER_COUNT) { "" }
+        controller.clearAllMedia()
+        onChangeLayout()
+    }
+    // SMCPKG_SUPPORT<<<Cursor024
+
     // SMCPKG_SUPPORT>>>Cursor004
     // Scaffold(topBar = { TopAppBar(...) }) { innerPadding ->
     //     Column(Modifier.padding(innerPadding).padding(horizontal = 8.dp, vertical = 4.dp)) { ... }
@@ -358,7 +372,10 @@ fun QuadPlayerScreen(
                     .size(20.dp)
                     .clip(CircleShape)
                     .background(Color(0x99000000))
-                    .clickable(onClick = onChangeLayout),
+                    // SMCPKG_SUPPORT>>>Cursor024
+                    // .clickable(onClick = onChangeLayout),
+                    .clickable(onClick = { leaveToSelection() }),
+                    // SMCPKG_SUPPORT<<<Cursor024
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

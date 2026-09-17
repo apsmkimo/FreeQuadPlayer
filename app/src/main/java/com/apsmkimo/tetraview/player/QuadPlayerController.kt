@@ -137,6 +137,28 @@ class QuadPlayerController(
         players.forEach { it.pause() }
     }
 
+    // SMCPKG_SUPPORT>>>Cursor024
+    /**
+     * Stop and forget media on every cell without releasing the ExoPlayers.
+     * Used when returning to layout selection so the next session starts empty.
+     */
+    fun clearAllMedia() {
+        if (released) return
+        players.forEachIndexed { index, player ->
+            autoplayWanted[index] = false
+            cancelBufferingRecovery(index)
+            runCatching {
+                player.playWhenReady = false
+                player.pause()
+                player.stop()
+                player.clearMediaItems()
+            }.onFailure { error ->
+                Log.w(TAG, "clearAllMedia[$index] failed", error)
+            }
+        }
+    }
+    // SMCPKG_SUPPORT<<<Cursor024
+
     fun resumePlaying(playingFlags: List<Boolean>) {
         if (released) return
         // SMCPKG_SUPPORT>>>Cursor015
