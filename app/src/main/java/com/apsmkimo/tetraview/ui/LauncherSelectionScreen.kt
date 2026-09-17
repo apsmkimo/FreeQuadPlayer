@@ -71,12 +71,20 @@ import com.apsmkimo.tetraview.data.PlayerLayout
 // SMCPKG_SUPPORT<<<Cursor021
 
 private val ScreenBlack = Color(0xFF000000)
-private val GlassTop = Color(0x99313B4D)
-private val GlassBottom = Color(0xCC151A24)
-private val GlassStroke = Color(0x6698C4E8)
-private val GlassGlow = Color(0x554070A0)
-private val GlyphFill = Color(0xFFD5DCE8)
 private val LabelWhite = Color(0xFFFFFFFF)
+// SMCPKG_SUPPORT>>>Cursor020
+// private val GlassTop = Color(0x99313B4D)
+// private val GlassBottom = Color(0xCC151A24)
+// private val GlassStroke = Color(0x6698C4E8)
+// private val GlassGlow = Color(0x554070A0)
+// private val GlyphFill = Color(0xFFD5DCE8)
+// SMCPKG_SUPPORT<<<Cursor020
+// SMCPKG_SUPPORT>>>Cursor023
+private val NeonBlue = Color(0xFF5BA8FF)
+private val NeonYellow = Color(0xFFFFE14A)
+private val NeonGreen = Color(0xFF3DDC84)
+private val NeonPink = Color(0xFFFF6BCC)
+// SMCPKG_SUPPORT<<<Cursor023
 
 @Composable
 fun LauncherSelectionScreen(
@@ -121,12 +129,14 @@ fun LauncherSelectionScreen(
                         tile = tile,
                         label = stringResource(R.string.layout_2x2_grid),
                         glyph = LayoutGlyph.GRID_2X2,
+                        accent = NeonBlue,
                         onClick = { onLayoutSelected(PlayerLayout.LANDSCAPE_2X2) },
                     )
                     GlassLayoutTile(
                         tile = tile,
                         label = stringResource(R.string.layout_1x4_stack),
                         glyph = LayoutGlyph.STACK_1X4,
+                        accent = NeonYellow,
                         onClick = { onLayoutSelected(PlayerLayout.VERTICAL_1X4) },
                     )
                 }
@@ -135,12 +145,14 @@ fun LauncherSelectionScreen(
                         tile = tile,
                         label = stringResource(R.string.layout_1x2_vertical),
                         glyph = LayoutGlyph.VERTICAL_1X2,
+                        accent = NeonGreen,
                         onClick = { onLayoutSelected(PlayerLayout.VERTICAL_1X2) },
                     )
                     GlassLayoutTile(
                         tile = tile,
                         label = stringResource(R.string.layout_2x1_horizontal),
                         glyph = LayoutGlyph.HORIZONTAL_2X1,
+                        accent = NeonPink,
                         onClick = { onLayoutSelected(PlayerLayout.LANDSCAPE_2X1) },
                     )
                 }
@@ -185,6 +197,9 @@ private fun GlassLayoutTile(
     tile: Dp,
     label: String,
     glyph: LayoutGlyph,
+    // SMCPKG_SUPPORT>>>Cursor023
+    accent: Color,
+    // SMCPKG_SUPPORT<<<Cursor023
     onClick: () -> Unit,
 ) {
     val corner = tile * 0.28f
@@ -194,18 +209,21 @@ private fun GlassLayoutTile(
         modifier = Modifier
             .size(tile)
             .shadow(
-                elevation = 18.dp,
+                elevation = 22.dp,
                 shape = shape,
-                ambientColor = GlassGlow,
-                spotColor = GlassGlow,
+                ambientColor = accent.copy(alpha = 0.55f),
+                spotColor = accent.copy(alpha = 0.40f),
             )
             .clip(shape)
             .background(
                 Brush.verticalGradient(
-                    listOf(GlassTop, GlassBottom),
+                    listOf(
+                        accent.copy(alpha = 0.28f),
+                        Color(0xCC10141C),
+                    ),
                 ),
             )
-            .border(1.5.dp, GlassStroke, shape)
+            .border(1.5.dp, accent.copy(alpha = 0.62f), shape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -219,7 +237,10 @@ private fun GlassLayoutTile(
                 .padding(bottom = tile * 0.14f)
                 .size(iconSize),
         ) {
-            drawLayoutGlyph(glyph)
+            // SMCPKG_SUPPORT>>>Cursor023
+            // drawLayoutGlyph(glyph)
+            drawLayoutGlyph(glyph, accent)
+            // SMCPKG_SUPPORT<<<Cursor023
         }
         Text(
             text = label,
@@ -233,66 +254,86 @@ private fun GlassLayoutTile(
     }
 }
 
-private fun DrawScope.drawLayoutGlyph(glyph: LayoutGlyph) {
+private fun DrawScope.drawLayoutGlyph(glyph: LayoutGlyph, accent: Color) {
     val w = size.width
     val h = size.height
     when (glyph) {
         LayoutGlyph.GRID_2X2 -> {
-            val gap = w * 0.16f
+            val gap = w * 0.18f
             val cell = (w - gap) / 2f
-            val radius = CornerRadius(cell * 0.32f)
+            val radius = CornerRadius(cell * 0.38f)
             val xs = floatArrayOf(0f, cell + gap)
             val ys = floatArrayOf(0f, cell + gap)
             for (x in xs) {
                 for (y in ys) {
-                    drawRoundRect(
-                        color = GlyphFill,
-                        topLeft = Offset(x, y),
-                        size = Size(cell, cell),
-                        cornerRadius = radius,
-                    )
+                    drawNeonPane(accent, Offset(x, y), Size(cell, cell), radius)
                 }
             }
         }
         LayoutGlyph.STACK_1X4 -> {
-            val gap = h * 0.12f
+            val gap = h * 0.14f
             val barH = (h - 3f * gap) / 4f
             val radius = CornerRadius(barH * 0.5f)
             repeat(4) { index ->
-                drawRoundRect(
-                    color = GlyphFill,
-                    topLeft = Offset(0f, index * (barH + gap)),
-                    size = Size(w, barH),
-                    cornerRadius = radius,
+                drawNeonPane(
+                    accent,
+                    Offset(0f, index * (barH + gap)),
+                    Size(w, barH),
+                    radius,
                 )
             }
         }
         LayoutGlyph.VERTICAL_1X2 -> {
-            val gap = h * 0.16f
+            val gap = h * 0.18f
             val barH = (h - gap) / 2f
-            val radius = CornerRadius(barH * 0.36f)
+            val radius = CornerRadius(barH * 0.48f)
             repeat(2) { index ->
-                drawRoundRect(
-                    color = GlyphFill,
-                    topLeft = Offset(0f, index * (barH + gap)),
-                    size = Size(w, barH),
-                    cornerRadius = radius,
+                drawNeonPane(
+                    accent,
+                    Offset(0f, index * (barH + gap)),
+                    Size(w, barH),
+                    radius,
                 )
             }
         }
         LayoutGlyph.HORIZONTAL_2X1 -> {
-            val gap = w * 0.16f
+            val gap = w * 0.18f
             val barW = (w - gap) / 2f
-            val radius = CornerRadius(barW * 0.36f)
+            val radius = CornerRadius(barW * 0.48f)
             repeat(2) { index ->
-                drawRoundRect(
-                    color = GlyphFill,
-                    topLeft = Offset(index * (barW + gap), 0f),
-                    size = Size(barW, h),
-                    cornerRadius = radius,
+                drawNeonPane(
+                    accent,
+                    Offset(index * (barW + gap), 0f),
+                    Size(barW, h),
+                    radius,
                 )
             }
         }
     }
+}
+
+private fun DrawScope.drawNeonPane(
+    accent: Color,
+    topLeft: Offset,
+    size: Size,
+    corner: CornerRadius,
+) {
+    val glowPad = size.minDimension * 0.12f
+    drawRoundRect(
+        color = accent.copy(alpha = 0.28f),
+        topLeft = Offset(topLeft.x - glowPad, topLeft.y - glowPad),
+        size = Size(size.width + glowPad * 2f, size.height + glowPad * 2f),
+        cornerRadius = CornerRadius(corner.x + glowPad),
+    )
+    drawRoundRect(
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.White.copy(alpha = 0.92f), accent),
+            startY = topLeft.y,
+            endY = topLeft.y + size.height,
+        ),
+        topLeft = topLeft,
+        size = size,
+        cornerRadius = corner,
+    )
 }
 // SMCPKG_SUPPORT<<<Cursor020

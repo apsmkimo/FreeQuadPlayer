@@ -23,15 +23,19 @@ package com.apsmkimo.tetraview.ui
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+// SMCPKG_SUPPORT>>>Cursor024
+// import androidx.compose.foundation.layout.Box
+// import androidx.compose.foundation.layout.fillMaxSize
+// SMCPKG_SUPPORT<<<Cursor024
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
+// SMCPKG_SUPPORT>>>Cursor024
+// import androidx.compose.ui.Modifier
+// SMCPKG_SUPPORT<<<Cursor024
 import androidx.compose.ui.platform.LocalContext
 // SMCPKG_SUPPORT>>>Cursor021
 // import com.example.quadvideoplayer.data.LayoutPreferences
@@ -42,8 +46,8 @@ import com.apsmkimo.tetraview.data.PlayerLayout
 
 /**
  * Every cold start shows [LauncherSelectionScreen]. The chosen layout is
- * in-session only (not written to prefs). Change-layout overlays the picker
- * so existing players are not disposed.
+ * in-session only (not written to prefs). Back-to-selection disposes the
+ * player so media is released and the next layout choice starts empty.
  */
 @Composable
 fun TetraViewApp() {
@@ -94,22 +98,33 @@ fun TetraViewApp() {
             onAbout = { showAbout = true },
         )
     } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            QuadPlayerScreen(
-                layout = selected,
-                onChangeLayout = { showSelection = true },
-                // SMCPKG_SUPPORT>>>Cursor022
-                // onAbout = { showAbout = true },
-                // SMCPKG_SUPPORT<<<Cursor022
-            )
-            if (showSelection) {
-                LauncherSelectionScreen(
-                    onLayoutSelected = ::applyLayout,
-                    onCancel = { showSelection = false },
-                    onAbout = { showAbout = true },
-                )
-            }
-        }
+        // SMCPKG_SUPPORT>>>Cursor024
+        // Box(modifier = Modifier.fillMaxSize()) {
+        //     QuadPlayerScreen(
+        //         layout = selected,
+        //         onChangeLayout = { showSelection = true },
+        //     )
+        //     if (showSelection) {
+        //         LauncherSelectionScreen(
+        //             onLayoutSelected = ::applyLayout,
+        //             onCancel = { showSelection = false },
+        //             onAbout = { showAbout = true },
+        //         )
+        //     }
+        // }
+        // Overlaying the picker left players running and remembered URIs.
+        // Dispose QuadPlayerScreen (layout = null) so releaseAll runs.
+        QuadPlayerScreen(
+            layout = selected,
+            onChangeLayout = {
+                layout = null
+                showSelection = true
+            },
+            // SMCPKG_SUPPORT>>>Cursor022
+            // onAbout = { showAbout = true },
+            // SMCPKG_SUPPORT<<<Cursor022
+        )
+        // SMCPKG_SUPPORT<<<Cursor024
     }
     // SMCPKG_SUPPORT<<<Cursor019
     // SMCPKG_SUPPORT>>>Cursor021

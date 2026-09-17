@@ -180,10 +180,11 @@ fun CellPlaybackBar(
         // SMCPKG_SUPPORT<<<Cursor022
 
         // SMCPKG_SUPPORT>>>Cursor006
-        VolumeGestureIcon(
-            volume = volume,
-            isMuted = isMuted,
-            onToggleMute = {
+        // SMCPKG_SUPPORT>>>Cursor023
+        // VolumeGestureIcon(... onVolumeDelta ... hold + swipe on speaker)
+        // Speaker is mute/unmute only. Level is changed by surface vertical drag.
+        CompactBarIconButton(
+            onClick = {
                 if (player.volume > 0f) {
                     lastAudibleVolume = player.volume
                     player.volume = 0f
@@ -194,15 +195,21 @@ fun CellPlaybackBar(
                     volume = restored
                 }
             },
-            onVolumeDelta = { delta ->
-                val next = (player.volume + delta).coerceIn(0f, 1f)
-                player.volume = next
-                volume = next
-                if (next > 0f) {
-                    lastAudibleVolume = next
-                }
-            },
-        )
+        ) {
+            Icon(
+                imageVector = if (isMuted) {
+                    Icons.AutoMirrored.Filled.VolumeOff
+                } else {
+                    Icons.AutoMirrored.Filled.VolumeUp
+                },
+                contentDescription = stringResource(
+                    if (isMuted) R.string.cell_unmute else R.string.cell_mute,
+                ),
+                tint = Color.White,
+                modifier = Modifier.size(BarIconSize),
+            )
+        }
+        // SMCPKG_SUPPORT<<<Cursor023
 
         Text(
             text = LocalVideoStore.formatDuration(durationMs),
